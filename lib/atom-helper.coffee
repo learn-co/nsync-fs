@@ -92,8 +92,7 @@ class AtomHelper
     atom.configDirPath
 
   package: ->
-    # todo: update package name
-    atom.packages.getActivePackage('tree-view')
+    atom.packages.getActivePackage('learn-ide-tree')
 
   treeView: ->
     @package()?.mainModule.treeView
