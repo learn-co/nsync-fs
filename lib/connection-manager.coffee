@@ -41,8 +41,8 @@ class ConnectionManager
       @websocket.on 'message', (event) =>
         onmessage(event, @virtualFileSystem)
 
-      @websocket.on 'error', (err) ->
-        console.error 'WS ERROR:', err
+      @websocket.on 'error', (err) =>
+        @onClose(err)
 
       @websocket.on 'close', (event) =>
         @onClose(event)

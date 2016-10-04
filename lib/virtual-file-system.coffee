@@ -9,6 +9,7 @@ FSAdapter = require './adapters/fs-adapter'
 FileSystemNode = require './file-system-node'
 ShellAdapter = require './adapters/shell-adapter'
 
+module.exports =
 class VirtualFileSystem
   constructor: ->
     @atomHelper = new AtomHelper(this)
@@ -188,6 +189,4 @@ class VirtualFileSystem
 
   save: (path, content) ->
     @send {command: 'save', path, content}
-
-module.exports = new VirtualFileSystem
 

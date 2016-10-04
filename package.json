@@ -1,7 +1,7 @@
 {
   "name": "nsync-fs",
   "version": "0.0.0",
-  "main": "./lib/virtual-file-system",
+  "main": "./lib/main",
   "description": "A virtual file system for Atom, synchronized with a remote physical file system",
   "repository": "https://github.com/learn-co/nsync-fs",
   "license": "MIT",
