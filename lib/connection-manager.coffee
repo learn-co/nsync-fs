@@ -1,51 +1,24 @@
-_ = require 'underscore-plus'
 _path = require 'path'
 onmessage= require './onmessage'
-SingleSocket = require 'single-socket'
-
-require('dotenv').config
-  path: _path.join(__dirname, '..', '.env'),
-  silent: true
-
-WS_SERVER_URL = (->
-  config = _.defaults
-    host: process.env['IDE_WS_HOST']
-    port: process.env['IDE_WS_PORT']
-    path: process.env['IDE_WS_PATH']
-  ,
-    host: 'ile.learn.co',
-    port: 443,
-    path: 'go_fs_server'
-    protocol: 'wss'
-
-  if config.port isnt 443
-    config.protocol = 'ws'
-
-  {protocol, host, port, path} = config
-
-  "#{protocol}://#{host}:#{port}/#{path}"
-)()
 
 module.exports =
 class ConnectionManager
   constructor: (@virtualFileSystem) ->
 
-  connect: ->
-    @virtualFileSystem.atomHelper.getToken().then (token) =>
-      @websocket = new SingleSocket "#{WS_SERVER_URL}?token=#{token}",
-        spawn: @virtualFileSystem.atomHelper.spawn
+  connect: (websocket, url, {spawn}) ->
+    @websocket = new websocket(url, {spawn})
 
-      @websocket.on 'open', (event) =>
-        @onOpen(event)
+    @websocket.on 'open', (event) =>
+      @onOpen(event)
 
-      @websocket.on 'message', (event) =>
-        onmessage(event, @virtualFileSystem)
+    @websocket.on 'message', (event) =>
+      onmessage(event, @virtualFileSystem)
 
-      @websocket.on 'error', (err) =>
-        @onClose(err)
+    @websocket.on 'error', (err) =>
+      @onClose(err)
 
-      @websocket.on 'close', (event) =>
-        @onClose(event)
+    @websocket.on 'close', (event) =>
+      @onClose(event)
 
   onOpen: (event) ->
     @connected = true

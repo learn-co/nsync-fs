@@ -20,9 +20,12 @@ class VirtualFileSystem
     @primaryNode = new FileSystemNode({})
     @connectionManager = new ConnectionManager(this)
 
-  configure: ({@expansionState, @localRoot}) ->
+  configure: ({@expansionState, @localRoot, connection}) ->
     @setLocalPaths()
-    @connectionManager.connect()
+
+    {websocket, url, spawn} = connection
+    @connectionManager.connect(websocket, url, {spawn})
+
     @emitter.emit('did-configure')
 
   setLocalPaths: ->
