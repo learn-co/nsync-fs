@@ -17,7 +17,7 @@ class VirtualFileSystem
     @atomHelper = new AtomHelper(this)
     @fs = new FSAdapter(this)
     @shell = new ShellAdapter(this)
-    @projectNode = new FileSystemNode({})
+    @primaryNode = new FileSystemNode({})
     @connectionManager = new ConnectionManager(this)
 
   configure: ({@expansionState, @localRoot}) ->
@@ -33,46 +33,46 @@ class VirtualFileSystem
     @sentLog = _path.join(@logDirectory, 'sent')
 
     @cacheDirectory = _path.join(@localRoot, 'var', 'cache')
-    @cachedProjectNode = _path.join(@cacheDirectory, 'project-node')
+    @cachedPrimaryNode = _path.join(@cacheDirectory, 'primary-node')
 
     fs.makeTreeSync(@logDirectory)
     fs.makeTreeSync(@cacheDirectory)
 
   serialize: ->
-    @projectNode.serialize()
+    @primaryNode.serialize()
 
   cache: ->
     serializedNode = @serialize()
 
     if serializedNode.path?
       data = JSON.stringify(serializedNode)
-      fs.writeFile(@cachedProjectNode, data)
+      fs.writeFile(@cachedPrimaryNode, data)
 
   loading: ->
     secondsTillNotifying = 3
 
     setTimeout =>
-      if not @projectNode.path?
+      if not @primaryNode.path?
         @loadingNotification = @atomHelper.loading()
     , secondsTillNotifying * 1000
 
-  setProjectNodeFromCache: (serializedNode) ->
-    return if @projectNode.path?
+  setPrimaryNodeFromCache: (serializedNode) ->
+    return if @primaryNode.path?
 
-    @projectNode = new FileSystemNode(serializedNode)
-    @atomHelper.updateProject(@projectNode.localPath(), @expansionState)
+    @primaryNode = new FileSystemNode(serializedNode)
+    @atomHelper.updateProject(@primaryNode.localPath(), @expansionState)
 
-  setProjectNode: (serializedNode) ->
-    @projectNode = new FileSystemNode(serializedNode)
+  setPrimaryNode: (serializedNode) ->
+    @primaryNode = new FileSystemNode(serializedNode)
 
     @loadingNotification?.dismiss()
     @loadingNotification = null
 
-    @atomHelper.updateProject(@projectNode.localPath(), @expansionState)
-    @sync(@projectNode.path)
+    @atomHelper.updateProject(@primaryNode.localPath(), @expansionState)
+    @sync(@primaryNode.path)
 
   activate: ->
-    fs.readFile @cachedProjectNode, (err, data) =>
+    fs.readFile @cachedPrimaryNode, (err, data) =>
       if err?
         console.error 'Unable to load cached project node:', err
         @loading()
@@ -85,7 +85,7 @@ class VirtualFileSystem
         @loading()
         return
 
-      @setProjectNodeFromCache(serializedNode)
+      @setPrimaryNodeFromCache(serializedNode)
 
   send: (msg) ->
     convertedMsg = {}
@@ -103,10 +103,10 @@ class VirtualFileSystem
   # ------------------
 
   getNode: (path) ->
-    @projectNode.get(path)
+    @primaryNode.get(path)
 
   hasPath: (path) ->
-    @projectNode.has(path)
+    @primaryNode.has(path)
 
   isDirectory: (path) ->
     @stat(path).isDirectory()

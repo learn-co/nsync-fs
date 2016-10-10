@@ -78,7 +78,7 @@ class AtomHelper
       if itemPath?
         @virtualFileSystem.getNode(itemPath)
       else
-        @virtualFileSystem.projectNode
+        @virtualFileSystem.primaryNode
 
     title = 'Learn IDE'
 

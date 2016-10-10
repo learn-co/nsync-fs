@@ -3,7 +3,7 @@ shell = require 'shell'
 
 changeStrategies = {
   delete: (path, virtualFileSystem) ->
-    node = virtualFileSystem.projectNode.remove(path)
+    node = virtualFileSystem.primaryNode.remove(path)
 
     return unless node?
 
@@ -14,7 +14,7 @@ changeStrategies = {
     node
 
   moved_from: (path, virtualFileSystem) ->
-    node = virtualFileSystem.projectNode.remove(path)
+    node = virtualFileSystem.primaryNode.remove(path)
 
     return unless node?
 
@@ -29,7 +29,7 @@ changeStrategies = {
     node
 
   create: (path, virtualFileSystem, virtualFile) ->
-    node = virtualFileSystem.projectNode.add(virtualFile)
+    node = virtualFileSystem.primaryNode.add(virtualFile)
 
     node.findPathsToSync().then (paths) ->
       virtualFileSystem.fetch(paths)
@@ -40,7 +40,7 @@ changeStrategies = {
     changeStrategies.create(path, virtualFileSystem, virtualFile)
 
   close_write: (path, virtualFileSystem, virtualFile) ->
-    node = virtualFileSystem.projectNode.update(virtualFile)
+    node = virtualFileSystem.primaryNode.update(virtualFile)
 
     if not virtualFileSystem.atomHelper.saveEditorForPath(node.localPath())
       node.determineSync().then (shouldSync) ->
