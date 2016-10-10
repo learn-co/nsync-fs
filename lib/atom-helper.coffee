@@ -106,9 +106,6 @@ class AtomHelper
   open: (path) ->
     atom.workspace.open(path)
 
-  addOpener: (opener) ->
-    atom.workspace.addOpener(opener)
-
   projectFindAndReplace: ->
     findAndReplace = atom.packages.getActivePackage('find-and-replace')
     projectFindView = findAndReplace.mainModule.projectFindView

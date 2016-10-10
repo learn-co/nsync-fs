@@ -3,6 +3,7 @@ _path = require 'path'
 convert = require './util/path-converter'
 fs = require 'fs-plus'
 shell = require 'shell'
+{Emitter} = require 'event-kit'
 AtomHelper = require './atom-helper'
 ConnectionManager = require './connection-manager'
 FSAdapter = require './adapters/fs-adapter'
@@ -12,20 +13,19 @@ ShellAdapter = require './adapters/shell-adapter'
 module.exports =
 class VirtualFileSystem
   constructor: ->
+    @emitter = new Emitter
     @atomHelper = new AtomHelper(this)
     @fs = new FSAdapter(this)
     @shell = new ShellAdapter(this)
     @projectNode = new FileSystemNode({})
     @connectionManager = new ConnectionManager(this)
-    @reconnectCount = 0
 
+  configure: ({@expansionState, @localRoot}) ->
     @setLocalPaths()
-
     @connectionManager.connect()
-    @addOpener()
+    @emitter.emit('did-configure')
 
   setLocalPaths: ->
-    @localRoot = _path.join(@atomHelper.configPath(), '.learn-ide')
     convert.configure({@localRoot})
 
     @logDirectory = _path.join(@localRoot, 'var', 'log')
@@ -37,12 +37,6 @@ class VirtualFileSystem
 
     fs.makeTreeSync(@logDirectory)
     fs.makeTreeSync(@cacheDirectory)
-
-  addOpener: ->
-    @atomHelper.addOpener (uri) =>
-      fs.stat uri, (err, stats) =>
-        if err? and @hasPath(uri)
-          @open(uri)
 
   serialize: ->
     @projectNode.serialize()
@@ -62,26 +56,19 @@ class VirtualFileSystem
         @loadingNotification = @atomHelper.loading()
     , secondsTillNotifying * 1000
 
-  setActivationState: (activationState) ->
-    @activationState = activationState
-
   setProjectNodeFromCache: (serializedNode) ->
     return if @projectNode.path?
 
     @projectNode = new FileSystemNode(serializedNode)
-    expansion = @activationState?.directoryExpansionStates
-
-    @atomHelper.updateProject(@projectNode.localPath(), expansion)
+    @atomHelper.updateProject(@projectNode.localPath(), @expansionState)
 
   setProjectNode: (serializedNode) ->
     @projectNode = new FileSystemNode(serializedNode)
-    expansion = @activationState?.directoryExpansionStates
-    @activationState = undefined
 
     @loadingNotification?.dismiss()
     @loadingNotification = null
 
-    @atomHelper.updateProject(@projectNode.localPath(), expansion)
+    @atomHelper.updateProject(@projectNode.localPath(), @expansionState)
     @sync(@projectNode.path)
 
   activate: ->
@@ -99,9 +86,6 @@ class VirtualFileSystem
         return
 
       @setProjectNodeFromCache(serializedNode)
-
-  expansionState: ->
-    @activationState?.directoryExpansionStates
 
   send: (msg) ->
     convertedMsg = {}
@@ -189,4 +173,11 @@ class VirtualFileSystem
 
   save: (path, content) ->
     @send {command: 'save', path, content}
+
+  # ------------------
+  # Event subscription
+  # ------------------
+
+  onDidConfigure: (callback) ->
+    @emitter.on 'did-configure', callback
 
