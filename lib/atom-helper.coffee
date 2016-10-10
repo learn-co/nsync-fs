@@ -112,17 +112,6 @@ class AtomHelper
     console.log projectFindView.model
     projectFindView.model
 
-  clearProjects: ->
-    # TODO: add these paths to localStorage to replace them on deactivation
-    initialProjectPaths = atom.project.getPaths()
-    initialProjectPaths.forEach (path) -> atom.project.removePath(path)
-
-  updateProject: (path, directoryExpansionStates) ->
-    @clearProjects()
-    atom.project.addPath(path)
-    @treeView()?.updateRoots(directoryExpansionStates)
-    @updateTitle()
-
   reloadTreeView: (path, pathToSelect) ->
     @treeView()?.entryForPath(path).reload()
     @treeView()?.selectEntryForPath(pathToSelect or path)

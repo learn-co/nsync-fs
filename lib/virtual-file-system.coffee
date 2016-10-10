@@ -42,46 +42,37 @@ class VirtualFileSystem
     @primaryNode.serialize()
 
   cache: ->
-    serializedNode = @serialize()
-
-    if serializedNode.path?
-      data = JSON.stringify(serializedNode)
+    if @hasPrimaryNode()
+      data = JSON.stringify(@serialize())
       fs.writeFile(@cachedPrimaryNode, data)
 
   loading: ->
-    secondsTillNotifying = 3
-
-    setTimeout =>
-      if not @primaryNode.path?
-        @loadingNotification = @atomHelper.loading()
-    , secondsTillNotifying * 1000
+    @emitter.emit('will-load')
 
   setPrimaryNodeFromCache: (serializedNode) ->
-    return if @primaryNode.path?
-
-    @primaryNode = new FileSystemNode(serializedNode)
-    @atomHelper.updateProject(@primaryNode.localPath(), @expansionState)
+    return if @hasPrimaryNode()
+    @setPrimaryNode(serializedNode)
 
   setPrimaryNode: (serializedNode) ->
     @primaryNode = new FileSystemNode(serializedNode)
 
-    @loadingNotification?.dismiss()
-    @loadingNotification = null
+    localPath = @primaryNode.localPath()
+    @emitter.emit('did-set-primary', {localPath, @expansionState})
 
-    @atomHelper.updateProject(@primaryNode.localPath(), @expansionState)
+  syncPrimaryNode: ->
     @sync(@primaryNode.path)
 
   activate: ->
     fs.readFile @cachedPrimaryNode, (err, data) =>
       if err?
-        console.error 'Unable to load cached project node:', err
+        console.error 'Unable to load cached primary node:', err
         @loading()
         return
 
       try
         serializedNode = JSON.parse(data)
       catch error
-        console.error 'Unable to parse cached project node:', error
+        console.error 'Unable to parse cached primary node:', error
         @loading()
         return
 
@@ -101,6 +92,9 @@ class VirtualFileSystem
   # ------------------
   # File introspection
   # ------------------
+
+  hasPrimaryNode: ->
+    @primaryNode.path?
 
   getNode: (path) ->
     @primaryNode.get(path)
@@ -180,4 +174,10 @@ class VirtualFileSystem
 
   onDidConfigure: (callback) ->
     @emitter.on 'did-configure', callback
+
+  onDidSetPrimary: (callback) ->
+    @emitter.on 'did-set-primary', callback
+
+  onWillLoad: (callback) ->
+    @emitter.on 'will-load', callback
 
