@@ -5,8 +5,8 @@ module.exports =
 class ConnectionManager
   constructor: (@virtualFileSystem) ->
 
-  connect: (websocket, url, {spawn}) ->
-    @websocket = new websocket(url, {spawn})
+  connect: (@ws, @url, @opts) ->
+    @websocket = new @ws(@url, @opts)
 
     @websocket.on 'open', (event) =>
       @onOpen(event)
@@ -24,7 +24,7 @@ class ConnectionManager
     @connected = true
     @startPingsAfterInit()
 
-    if @reconnectNotification?
+    if @reconnecting
       @successfulReconnect()
 
     @virtualFileSystem.activate()
@@ -33,16 +33,16 @@ class ConnectionManager
   onClose: (event) ->
     console.warn 'WS CLOSED:', event
 
-    if @connected and not @reconnectNotification?
-      @connected = false
-      @virtualFileSystem.atomHelper.disconnected()
+    if @connected and not @reconnecting
+      @virtualFileSystem.disconnected()
 
+    @connected = false
     @reconnect()
 
   send: (msg) ->
     if not @connected
-      @virtualFileSystem.atomHelper.error 'Learn IDE: you are not connected!',
-        detail: 'The operation cannot be performed while disconnected'
+      msg = 'The operation cannot be performed while disconnected'
+      @virtualFileSystem.disconnected(msg)
 
     console.log 'SEND:', msg
     payload = JSON.stringify(msg)
@@ -54,18 +54,18 @@ class ConnectionManager
     @websocket.send(payload)
 
   reconnect: ->
-    if not @reconnectNotification?
-      @reconnectNotification = @virtualFileSystem.atomHelper.connecting()
+    unless @reconnecting
+      @reconnecting = true
+      @virtualFileSystem.connecting()
 
     secondsBetweenAttempts = 5
     setTimeout =>
-      @connect()
+      @connect(@ws, @url, @opts)
     , secondsBetweenAttempts * 1000
 
   successfulReconnect: ->
-    @reconnectNotification.dismiss()
-    @reconnectNotification = null
-    @virtualFileSystem.atomHelper.success 'Learn IDE: connected!'
+    @reconnecting = false
+    @virtualFileSystem.connected()
 
   startPingsAfterInit: ->
     # TODO: something cleaner, this simply waits n minutes after init is sent

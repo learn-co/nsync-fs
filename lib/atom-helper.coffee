@@ -62,10 +62,6 @@ class AtomHelper
       atom.workspace.updateWindowTitle = LocalStorage.getItem('workspace:updateTitle')
       LocalStorage.removeItem('workspace:updateTitle')
 
-  spawn: (modulePath) ->
-    {BufferedNodeProcess} = require 'atom'
-    new BufferedNodeProcess({command: modulePath})
-
   replaceTitleUpdater: ->
     if not LocalStorage.getItem('workspace:updateTitle')
       LocalStorage.setItem('workspace:updateTitle', atom.workspace.updateWindowTitle)
@@ -143,14 +139,6 @@ class AtomHelper
   unimplemented: ({type}) =>
     command = type.replace(/^learn-ide:/, '').replace(/-/g, ' ')
     @warn 'Learn IDE: coming soon!', {detail: "Sorry, '#{command}' isn't available yet."}
-
-  disconnected: ->
-    @error 'Learn IDE: connection lost 😮',
-      detail: 'The connection with the remote server has been lost.'
-      dismissable: false
-
-  connecting: (seconds) ->
-    @warn 'Learn IDE: attempting to connect...', {dismissable: true}
 
   onLearnSave: ({target}) =>
     textEditor = atom.workspace.getTextEditors().find (editor) ->

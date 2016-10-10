@@ -49,6 +49,15 @@ class VirtualFileSystem
       data = JSON.stringify(@serialize())
       fs.writeFile(@cachedPrimaryNode, data)
 
+  disconnected: (msg) ->
+    @emitter.emit('did-disconnect', msg)
+
+  connecting: ->
+    @emitter.emit('will-connect')
+
+  connected: ->
+    @emitter.emit('did-connect')
+
   loading: ->
     @emitter.emit('will-load')
 
@@ -183,4 +192,13 @@ class VirtualFileSystem
 
   onWillLoad: (callback) ->
     @emitter.on 'will-load', callback
+
+  onDidDisconnect: (callback) ->
+    @emitter.on 'did-disconnect', callback
+
+  onWillConnect: (callback) ->
+    @emitter.on 'will-connect', callback
+
+  onDidConnect: (callback) ->
+    @emitter.on 'did-connect', callback
 
