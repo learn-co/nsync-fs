@@ -1,57 +1,30 @@
-_ = require 'underscore-plus'
 _path = require 'path'
 onmessage= require './onmessage'
-SingleSocket = require 'single-socket'
-
-require('dotenv').config
-  path: _path.join(__dirname, '..', '.env'),
-  silent: true
-
-WS_SERVER_URL = (->
-  config = _.defaults
-    host: process.env['IDE_WS_HOST']
-    port: process.env['IDE_WS_PORT']
-    path: process.env['IDE_WS_PATH']
-  ,
-    host: 'ile.learn.co',
-    port: 443,
-    path: 'go_fs_server'
-    protocol: 'wss'
-
-  if config.port isnt 443
-    config.protocol = 'ws'
-
-  {protocol, host, port, path} = config
-
-  "#{protocol}://#{host}:#{port}/#{path}"
-)()
 
 module.exports =
 class ConnectionManager
   constructor: (@virtualFileSystem) ->
 
-  connect: ->
-    @virtualFileSystem.atomHelper.getToken().then (token) =>
-      @websocket = new SingleSocket "#{WS_SERVER_URL}?token=#{token}",
-        spawn: @virtualFileSystem.atomHelper.spawn
+  connect: (@ws, @url, @opts) ->
+    @websocket = new @ws(@url, @opts)
 
-      @websocket.on 'open', (event) =>
-        @onOpen(event)
+    @websocket.on 'open', (event) =>
+      @onOpen(event)
 
-      @websocket.on 'message', (event) =>
-        onmessage(event, @virtualFileSystem)
+    @websocket.on 'message', (event) =>
+      onmessage(event, @virtualFileSystem)
 
-      @websocket.on 'error', (err) =>
-        @onClose(err)
+    @websocket.on 'error', (err) =>
+      @onClose(err)
 
-      @websocket.on 'close', (event) =>
-        @onClose(event)
+    @websocket.on 'close', (event) =>
+      @onClose(event)
 
   onOpen: (event) ->
     @connected = true
     @startPingsAfterInit()
 
-    if @reconnectNotification?
+    if @reconnecting
       @successfulReconnect()
 
     @virtualFileSystem.activate()
@@ -60,16 +33,16 @@ class ConnectionManager
   onClose: (event) ->
     console.warn 'WS CLOSED:', event
 
-    if @connected and not @reconnectNotification?
-      @connected = false
-      @virtualFileSystem.atomHelper.disconnected()
+    if @connected and not @reconnecting
+      @virtualFileSystem.disconnected()
 
+    @connected = false
     @reconnect()
 
   send: (msg) ->
     if not @connected
-      @virtualFileSystem.atomHelper.error 'Learn IDE: you are not connected!',
-        detail: 'The operation cannot be performed while disconnected'
+      msg = 'The operation cannot be performed while disconnected'
+      @virtualFileSystem.disconnected(msg)
 
     console.log 'SEND:', msg
     payload = JSON.stringify(msg)
@@ -81,18 +54,18 @@ class ConnectionManager
     @websocket.send(payload)
 
   reconnect: ->
-    if not @reconnectNotification?
-      @reconnectNotification = @virtualFileSystem.atomHelper.connecting()
+    unless @reconnecting
+      @reconnecting = true
+      @virtualFileSystem.connecting()
 
     secondsBetweenAttempts = 5
     setTimeout =>
-      @connect()
+      @connect(@ws, @url, @opts)
     , secondsBetweenAttempts * 1000
 
   successfulReconnect: ->
-    @reconnectNotification.dismiss()
-    @reconnectNotification = null
-    @virtualFileSystem.atomHelper.success 'Learn IDE: connected!'
+    @reconnecting = false
+    @virtualFileSystem.connected()
 
   startPingsAfterInit: ->
     # TODO: something cleaner, this simply waits n minutes after init is sent

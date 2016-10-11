@@ -3,7 +3,7 @@ shell = require 'shell'
 
 changeStrategies = {
   delete: (path, virtualFileSystem) ->
-    node = virtualFileSystem.projectNode.remove(path)
+    node = virtualFileSystem.primaryNode.remove(path)
 
     return unless node?
 
@@ -14,7 +14,7 @@ changeStrategies = {
     node
 
   moved_from: (path, virtualFileSystem) ->
-    node = virtualFileSystem.projectNode.remove(path)
+    node = virtualFileSystem.primaryNode.remove(path)
 
     return unless node?
 
@@ -29,7 +29,7 @@ changeStrategies = {
     node
 
   create: (path, virtualFileSystem, virtualFile) ->
-    node = virtualFileSystem.projectNode.add(virtualFile)
+    node = virtualFileSystem.primaryNode.add(virtualFile)
 
     node.findPathsToSync().then (paths) ->
       virtualFileSystem.fetch(paths)
@@ -40,12 +40,12 @@ changeStrategies = {
     changeStrategies.create(path, virtualFileSystem, virtualFile)
 
   close_write: (path, virtualFileSystem, virtualFile) ->
-    node = virtualFileSystem.projectNode.update(virtualFile)
+    node = virtualFileSystem.primaryNode.update(virtualFile)
+    virtualFileSystem.updated(node)
 
-    if not virtualFileSystem.atomHelper.saveEditorForPath(node.localPath())
-      node.determineSync().then (shouldSync) ->
-        if shouldSync
-          virtualFileSystem.fetch(node.path)
+    node.determineSync().then (shouldSync) ->
+      if shouldSync
+        virtualFileSystem.fetch(node.path)
 
     node
 }
@@ -53,7 +53,6 @@ changeStrategies = {
 module.exports = change = (virtualFileSystem, {event, path, virtualFile}) ->
   console.log "#{event.toUpperCase()}:", path
   strategy = changeStrategies[event]
-  atomHelper = virtualFileSystem.atomHelper
 
   if not strategy?
     return console.warn 'No strategy for change event:', event, path
@@ -63,7 +62,5 @@ module.exports = change = (virtualFileSystem, {event, path, virtualFile}) ->
   if not node?
     return console.warn 'Change strategy did not return node:', event, strategy
 
-  parent = node.parent
-  atomHelper.reloadTreeView(parent.localPath(), node.localPath())
-  atomHelper.updateTitle()
+  virtualFileSystem.changed(node)
 

@@ -3,7 +3,7 @@ _path = require 'path'
 convert = require './util/path-converter'
 fs = require 'fs-plus'
 shell = require 'shell'
-AtomHelper = require './atom-helper'
+{Emitter} = require 'event-kit'
 ConnectionManager = require './connection-manager'
 FSAdapter = require './adapters/fs-adapter'
 FileSystemNode = require './file-system-node'
@@ -12,20 +12,21 @@ ShellAdapter = require './adapters/shell-adapter'
 module.exports =
 class VirtualFileSystem
   constructor: ->
-    @atomHelper = new AtomHelper(this)
+    @emitter = new Emitter
     @fs = new FSAdapter(this)
     @shell = new ShellAdapter(this)
-    @projectNode = new FileSystemNode({})
+    @primaryNode = new FileSystemNode({})
     @connectionManager = new ConnectionManager(this)
-    @reconnectCount = 0
 
+  configure: ({@expansionState, @localRoot, connection}) ->
     @setLocalPaths()
 
-    @connectionManager.connect()
-    @addOpener()
+    {websocket, url, spawn} = connection
+    @connectionManager.connect(websocket, url, {spawn})
+
+    @emitter.emit('did-configure')
 
   setLocalPaths: ->
-    @localRoot = _path.join(@atomHelper.configPath(), '.learn-ide')
     convert.configure({@localRoot})
 
     @logDirectory = _path.join(@localRoot, 'var', 'log')
@@ -33,75 +34,68 @@ class VirtualFileSystem
     @sentLog = _path.join(@logDirectory, 'sent')
 
     @cacheDirectory = _path.join(@localRoot, 'var', 'cache')
-    @cachedProjectNode = _path.join(@cacheDirectory, 'project-node')
+    @cachedPrimaryNode = _path.join(@cacheDirectory, 'primary-node')
 
     fs.makeTreeSync(@logDirectory)
     fs.makeTreeSync(@cacheDirectory)
 
-  addOpener: ->
-    @atomHelper.addOpener (uri) =>
-      fs.stat uri, (err, stats) =>
-        if err? and @hasPath(uri)
-          @open(uri)
-
   serialize: ->
-    @projectNode.serialize()
+    @primaryNode.serialize()
 
   cache: ->
-    serializedNode = @serialize()
+    if @hasPrimaryNode()
+      data = JSON.stringify(@serialize())
+      fs.writeFile(@cachedPrimaryNode, data)
 
-    if serializedNode.path?
-      data = JSON.stringify(serializedNode)
-      fs.writeFile(@cachedProjectNode, data)
+  disconnected: (msg) ->
+    @emitter.emit('did-disconnect', msg)
+
+  connecting: ->
+    @emitter.emit('will-connect')
+
+  connected: ->
+    @emitter.emit('did-connect')
 
   loading: ->
-    secondsTillNotifying = 3
+    @emitter.emit('will-load')
 
-    setTimeout =>
-      if not @projectNode.path?
-        @loadingNotification = @atomHelper.loading()
-    , secondsTillNotifying * 1000
+  receivedCustomCommand: (payload) ->
+    @emitter.emit('did-receive-custom-command', payload)
 
-  setActivationState: (activationState) ->
-    @activationState = activationState
+  changed: (node) ->
+    @emitter.emit('did-change', node.localPath())
 
-  setProjectNodeFromCache: (serializedNode) ->
-    return if @projectNode.path?
+  updated: (node) ->
+    @emitter.emit('did-update', node.localPath())
 
-    @projectNode = new FileSystemNode(serializedNode)
-    expansion = @activationState?.directoryExpansionStates
+  setPrimaryNodeFromCache: (serializedNode) ->
+    return if @hasPrimaryNode()
+    @setPrimaryNode(serializedNode)
 
-    @atomHelper.updateProject(@projectNode.localPath(), expansion)
+  setPrimaryNode: (serializedNode) ->
+    @primaryNode = new FileSystemNode(serializedNode)
 
-  setProjectNode: (serializedNode) ->
-    @projectNode = new FileSystemNode(serializedNode)
-    expansion = @activationState?.directoryExpansionStates
-    @activationState = undefined
+    localPath = @primaryNode.localPath()
+    @emitter.emit('did-set-primary', {localPath, @expansionState})
 
-    @loadingNotification?.dismiss()
-    @loadingNotification = null
-
-    @atomHelper.updateProject(@projectNode.localPath(), expansion)
-    @sync(@projectNode.path)
+  syncPrimaryNode: ->
+    @sync(@primaryNode.path)
 
   activate: ->
-    fs.readFile @cachedProjectNode, (err, data) =>
+    fs.readFile @cachedPrimaryNode, (err, data) =>
       if err?
-        console.error 'Unable to load cached project node:', err
+        console.error 'Unable to load cached primary node:', err
         @loading()
         return
 
       try
         serializedNode = JSON.parse(data)
       catch error
-        console.error 'Unable to parse cached project node:', error
+        console.error 'Unable to parse cached primary node:', error
         @loading()
         return
 
-      @setProjectNodeFromCache(serializedNode)
-
-  expansionState: ->
-    @activationState?.directoryExpansionStates
+      @setPrimaryNodeFromCache(serializedNode)
 
   send: (msg) ->
     convertedMsg = {}
@@ -118,11 +112,14 @@ class VirtualFileSystem
   # File introspection
   # ------------------
 
+  hasPrimaryNode: ->
+    @primaryNode.path?
+
   getNode: (path) ->
-    @projectNode.get(path)
+    @primaryNode.get(path)
 
   hasPath: (path) ->
-    @projectNode.has(path)
+    @primaryNode.has(path)
 
   isDirectory: (path) ->
     @stat(path).isDirectory()
@@ -189,4 +186,35 @@ class VirtualFileSystem
 
   save: (path, content) ->
     @send {command: 'save', path, content}
+
+  # ------------------
+  # Event subscription
+  # ------------------
+
+  onDidConfigure: (callback) ->
+    @emitter.on 'did-configure', callback
+
+  onDidSetPrimary: (callback) ->
+    @emitter.on 'did-set-primary', callback
+
+  onWillLoad: (callback) ->
+    @emitter.on 'will-load', callback
+
+  onDidDisconnect: (callback) ->
+    @emitter.on 'did-disconnect', callback
+
+  onWillConnect: (callback) ->
+    @emitter.on 'will-connect', callback
+
+  onDidConnect: (callback) ->
+    @emitter.on 'did-connect', callback
+
+  onDidReceiveCustomCommand: (callback) ->
+    @emitter.on 'did-receive-custom-command', callback
+
+  onDidChange: (callback) ->
+    @emitter.on 'did-change', callback
+
+  onDidUpdate: (callback) ->
+    @emitter.on 'did-update', callback
 

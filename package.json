@@ -6,13 +6,11 @@
   "repository": "https://github.com/learn-co/nsync-fs",
   "license": "MIT",
   "dependencies": {
-    "cson": "^3.0.2",
     "dotenv": "2.0.0",
     "event-kit": "^1.0.0",
     "fs-plus": "^2.3.0",
     "graceful-fs": "^4.1.6",
     "shell": "^0.3.2",
-    "single-socket": "0.0.6",
     "underscore-plus": "^1.0.0"
   },
   "devDependencies": {
