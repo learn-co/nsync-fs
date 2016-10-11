@@ -14,18 +14,10 @@ class AtomHelper
     atom.packages.onDidActivateInitialPackages(@handleEvents)
 
   handleEvents: =>
-    body = document.body
-    body.classList.add('learn-ide')
-
     @disposables = new CompositeDisposable
 
     @disposables.add atom.commands.add body,
-      'learn-ide:save': @onLearnSave
-      'learn-ide:save-as': @unimplemented
-      'learn-ide:save-all': @unimplemented
       'learn-ide:import': @onImport
-      'learn-ide:file-open': @unimplemented
-      'learn-ide:add-project': @unimplemented
 
     @disposables.add atom.workspace.observeTextEditors (editor) =>
       @disposables.add editor.onDidSave (e) =>
