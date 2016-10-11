@@ -1,30 +1,16 @@
 fs = require 'graceful-fs'
 CSON = require 'cson'
 _path = require 'path'
-crypto = require 'crypto'
-LocalStorage = window.localStorage
 {CompositeDisposable} = require 'atom'
 remote = require 'remote'
 dialog = remote.require 'dialog'
 
-humanize = (seconds) ->
-  minutes = Math.floor(seconds / 60)
-  time = if minutes then minutes else seconds
-  unit = if minutes then 'minute' else 'second'
-  "#{time} #{unit}#{if time is 1 then '' else 's'}"
-
 convertEOL = (text) ->
   text.replace(/\r\n|\n|\r/g, '\n')
-
-digest = (str) ->
-  crypto.createHash('md5').update(str, 'utf8').digest('hex')
 
 module.exports =
 class AtomHelper
   constructor: (@virtualFileSystem) ->
-    @addMenu()
-    @addKeymaps()
-    @addContextMenus()
     atom.packages.onDidActivateInitialPackages(@handleEvents)
 
   handleEvents: =>
@@ -76,34 +62,16 @@ class AtomHelper
   findOrCreateBuffer: (path) ->
     atom.project.bufferForPath(path)
 
-  success: (msg, opts) ->
-    atom.notifications.addSuccess(msg, opts)
-
-  info: (msg, opts) ->
-    atom.notifications.addInfo(msg, opts)
-
-  warn: (msg, opts) ->
-    atom.notifications.addWarning(msg, opts)
-
-  error: (msg, opts) ->
-    atom.notifications.addError(msg, opts)
-
-  loading: ->
-    @info 'Learn IDE: loading your remote code...',
-      detail: """This may take a moment, but will only happen
-              very occasionally (maybe just once)"""
-      dismissable: true
-
-  unimplemented: ({type}) =>
-    command = type.replace(/^learn-ide:/, '').replace(/-/g, ' ')
-    @warn 'Learn IDE: coming soon!', {detail: "Sorry, '#{command}' isn't available yet."}
+  # unimplemented: ({type}) =>
+  #   command = type.replace(/^learn-ide:/, '').replace(/-/g, ' ')
+  #   @warn 'Learn IDE: coming soon!', {detail: "Sorry, '#{command}' isn't available yet."}
 
   onLearnSave: ({target}) =>
     textEditor = atom.workspace.getTextEditors().find (editor) ->
       editor.element is target
 
     if not textEditor.getPath()?
-      # TODO: this happens if an untitled editor is saved. need to build a 'Save As' or sorts
+      # TODO: this happens if an untitled editor is saved
       return console.log 'Cannot save file without path'
 
     text = convertEOL(textEditor.getText())
@@ -120,21 +88,6 @@ class AtomHelper
           content = new Buffer(text).toString('base64')
           @virtualFileSystem.save(path, content)
 
-  saveEditorForPath: (path) ->
-    textEditor = atom.workspace.getTextEditors().find (editor) ->
-      editor.getPath() is path
-
-    return false unless textEditor?
-
-    if not textEditor.isModified()
-      false
-    else
-      node = @virtualFileSystem.getNode(path)
-      if node.digest is digest(textEditor.getText())
-        textEditor.save()
-        true
-      false
-
   saveAfterProjectReplace: (path) =>
     fs.readFile path, 'utf8', (err, data) =>
       if err
@@ -144,32 +97,32 @@ class AtomHelper
       content = new Buffer(text).toString('base64')
       @virtualFileSystem.save(path, content)
 
-  addMenu: ->
-    path = _path.join(__dirname, '..', 'menus', 'menu.cson')
+  # addMenu: ->
+  #   path = _path.join(__dirname, '..', 'menus', 'menu.cson')
 
-    fs.readFile path, (err, data) ->
-      if err?
-        return console.error "Unable to add menu:", err
+  #   fs.readFile path, (err, data) ->
+  #     if err?
+  #       return console.error "Unable to add menu:", err
 
-      atom.menu.add CSON.parse(data)
+  #     atom.menu.add CSON.parse(data)
 
-  addKeymaps: ->
-    path = _path.join(__dirname, '..', 'keymaps', 'keymaps.cson')
+  # addKeymaps: ->
+  #   path = _path.join(__dirname, '..', 'keymaps', 'keymaps.cson')
 
-    fs.readFile path, (err, data) ->
-      if err?
-        return console.error "Unable to add keymaps:", err
+  #   fs.readFile path, (err, data) ->
+  #     if err?
+  #       return console.error "Unable to add keymaps:", err
 
-      atom.keymaps.add path, CSON.parse(data)
+  #     atom.keymaps.add path, CSON.parse(data)
 
-  addContextMenus: ->
-    path = _path.join(__dirname, '..', 'menus', 'context-menus.cson')
+  # addContextMenus: ->
+  #   path = _path.join(__dirname, '..', 'menus', 'context-menus.cson')
 
-    fs.readFile path, (err, data) ->
-      if err?
-        return console.error "Unable to add context-menus:", err
+  #   fs.readFile path, (err, data) ->
+  #     if err?
+  #       return console.error "Unable to add context-menus:", err
 
-      atom.contextMenu.add CSON.parse(data)
+  #     atom.contextMenu.add CSON.parse(data)
 
   onImport: =>
     dialog.showOpenDialog
