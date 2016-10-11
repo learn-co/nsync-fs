@@ -17,6 +17,7 @@ class VirtualFileSystem
     @shell = new ShellAdapter(this)
     @primaryNode = new FileSystemNode({})
     @connectionManager = new ConnectionManager(this)
+    @fetchFilters = []
 
   configure: ({@expansionState, @localRoot, connection}) ->
     @setLocalPaths()
@@ -67,6 +68,9 @@ class VirtualFileSystem
 
   updated: (node) ->
     @emitter.emit('did-update', node.localPath())
+
+  addFetchFilter: (f) ->
+    @fetchFilters.push(f)
 
   setPrimaryNodeFromCache: (serializedNode) ->
     return if @hasPrimaryNode()
@@ -183,6 +187,12 @@ class VirtualFileSystem
 
     if paths.length
       @send {command: 'fetch', paths}
+
+  filteredFetch: (path) ->
+    return if @fetchFilters.some (filter) ->
+      filter(path)
+
+    @fetch(path)
 
   save: (path, content) ->
     @send {command: 'save', path, content}

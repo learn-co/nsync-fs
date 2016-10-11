@@ -45,7 +45,7 @@ changeStrategies = {
 
     node.determineSync().then (shouldSync) ->
       if shouldSync
-        virtualFileSystem.fetch(node.path)
+        virtualFileSystem.filteredFetch(node.path)
 
     node
 }
