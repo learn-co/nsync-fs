@@ -21,8 +21,8 @@ class VirtualFileSystem
   configure: ({@expansionState, @localRoot, connection}) ->
     @setLocalPaths()
 
-    {websocket, url, spawn} = connection
-    @connectionManager.connect(websocket, url, {spawn})
+    {websocket, url, opts} = connection
+    @connectionManager.connect(websocket, url, opts)
 
     @emitter.emit('did-configure')
 
