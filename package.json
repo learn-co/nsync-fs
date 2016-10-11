@@ -6,7 +6,6 @@
   "repository": "https://github.com/learn-co/nsync-fs",
   "license": "MIT",
   "dependencies": {
-    "cson": "^3.0.2",
     "dotenv": "2.0.0",
     "event-kit": "^1.0.0",
     "fs-plus": "^2.3.0",

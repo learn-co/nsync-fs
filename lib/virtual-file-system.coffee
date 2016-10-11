@@ -4,7 +4,6 @@ convert = require './util/path-converter'
 fs = require 'fs-plus'
 shell = require 'shell'
 {Emitter} = require 'event-kit'
-AtomHelper = require './atom-helper'
 ConnectionManager = require './connection-manager'
 FSAdapter = require './adapters/fs-adapter'
 FileSystemNode = require './file-system-node'
@@ -14,7 +13,6 @@ module.exports =
 class VirtualFileSystem
   constructor: ->
     @emitter = new Emitter
-    @atomHelper = new AtomHelper(this)
     @fs = new FSAdapter(this)
     @shell = new ShellAdapter(this)
     @primaryNode = new FileSystemNode({})
