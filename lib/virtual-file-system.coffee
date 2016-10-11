@@ -67,6 +67,9 @@ class VirtualFileSystem
   changed: (node) ->
     @emitter.emit('did-change', node.localPath())
 
+  updated: (node) ->
+    @emitter.emit('did-update', node.localPath())
+
   setPrimaryNodeFromCache: (serializedNode) ->
     return if @hasPrimaryNode()
     @setPrimaryNode(serializedNode)
@@ -213,4 +216,7 @@ class VirtualFileSystem
 
   onDidChange: (callback) ->
     @emitter.on 'did-change', callback
+
+  onDidUpdate: (callback) ->
+    @emitter.on 'did-update', callback
 

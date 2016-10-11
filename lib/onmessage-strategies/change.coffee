@@ -41,11 +41,11 @@ changeStrategies = {
 
   close_write: (path, virtualFileSystem, virtualFile) ->
     node = virtualFileSystem.primaryNode.update(virtualFile)
+    virtualFileSystem.updated(node)
 
-    if not virtualFileSystem.atomHelper.saveEditorForPath(node.localPath())
-      node.determineSync().then (shouldSync) ->
-        if shouldSync
-          virtualFileSystem.fetch(node.path)
+    node.determineSync().then (shouldSync) ->
+      if shouldSync
+        virtualFileSystem.fetch(node.path)
 
     node
 }

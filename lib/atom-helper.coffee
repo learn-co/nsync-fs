@@ -44,7 +44,6 @@ class AtomHelper
     @disposables.add atom.workspace.observeTextEditors (editor) =>
       @disposables.add editor.onDidSave (e) =>
         @onEditorSave(e)
-        @updateTitle()
 
     @disposables.add atom.packages.onDidActivatePackage (pkg) =>
       return unless pkg.name is 'find-and-replace'
