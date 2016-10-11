@@ -53,7 +53,6 @@ changeStrategies = {
 module.exports = change = (virtualFileSystem, {event, path, virtualFile}) ->
   console.log "#{event.toUpperCase()}:", path
   strategy = changeStrategies[event]
-  atomHelper = virtualFileSystem.atomHelper
 
   if not strategy?
     return console.warn 'No strategy for change event:', event, path
@@ -63,7 +62,5 @@ module.exports = change = (virtualFileSystem, {event, path, virtualFile}) ->
   if not node?
     return console.warn 'Change strategy did not return node:', event, strategy
 
-  parent = node.parent
-  atomHelper.reloadTreeView(parent.localPath(), node.localPath())
-  atomHelper.updateTitle()
+  virtualFileSystem.changed(node)
 

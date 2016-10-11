@@ -64,6 +64,9 @@ class VirtualFileSystem
   receivedCustomCommand: (payload) ->
     @emitter.emit('did-receive-custom-command', payload)
 
+  changed: (node) ->
+    @emitter.emit('did-change', node.localPath())
+
   setPrimaryNodeFromCache: (serializedNode) ->
     return if @hasPrimaryNode()
     @setPrimaryNode(serializedNode)
@@ -207,4 +210,7 @@ class VirtualFileSystem
 
   onDidReceiveCustomCommand: (callback) ->
     @emitter.on 'did-receive-custom-command', callback
+
+  onDidChange: (callback) ->
+    @emitter.on 'did-change', callback
 

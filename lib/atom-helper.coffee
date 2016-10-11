@@ -25,7 +25,6 @@ class AtomHelper
     @addMenu()
     @addKeymaps()
     @addContextMenus()
-    @replaceTitleUpdater()
     atom.packages.onDidActivateInitialPackages(@handleEvents)
 
   handleEvents: =>
@@ -59,33 +58,6 @@ class AtomHelper
     @disposables.add @package().onDidDeactivate =>
       @disposables.dispose()
       @virtualFileSystem.cache()
-      atom.workspace.updateWindowTitle = LocalStorage.getItem('workspace:updateTitle')
-      LocalStorage.removeItem('workspace:updateTitle')
-
-  replaceTitleUpdater: ->
-    if not LocalStorage.getItem('workspace:updateTitle')
-      LocalStorage.setItem('workspace:updateTitle', atom.workspace.updateWindowTitle)
-      atom.workspace.updateWindowTitle = @updateTitle
-
-  updateTitle: =>
-    itemPath = atom.workspace.getActivePaneItem()?.getPath?()
-
-    node =
-      if itemPath?
-        @virtualFileSystem.getNode(itemPath)
-      else
-        @virtualFileSystem.primaryNode
-
-    title = 'Learn IDE'
-
-    if node? and node.path?
-      title += " — #{node.path.replace(/^\//, '')}"
-      atom.applicationDelegate.setRepresentedFilename(node.localPath())
-
-    document.title = title
-
-  configPath: ->
-    atom.configDirPath
 
   package: ->
     atom.packages.getActivePackage('learn-ide-tree')
@@ -93,24 +65,11 @@ class AtomHelper
   treeView: ->
     @package()?.mainModule.treeView
 
-  getToken: ->
-    new Promise (resolve) ->
-      atom.config.observe 'learn-ide.oauthToken', (token) ->
-        if token? and token.length
-          resolve(token)
-
-  open: (path) ->
-    atom.workspace.open(path)
-
   projectFindAndReplace: ->
     findAndReplace = atom.packages.getActivePackage('find-and-replace')
     projectFindView = findAndReplace.mainModule.projectFindView
     console.log projectFindView.model
     projectFindView.model
-
-  reloadTreeView: (path, pathToSelect) ->
-    @treeView()?.entryForPath(path).reload()
-    @treeView()?.selectEntryForPath(pathToSelect or path)
 
   findBuffer: (path) ->
     atom.project.findBufferForPath(path)
