@@ -4,5 +4,5 @@ module.exports = customCommand = (virtualFileSystem, {payload}) ->
   catch
     return console.error 'Unable to parse customCommand payload:', payload
 
-    virtualFileSystem.recievedCustomCommand(data)
+  virtualFileSystem.receivedCustomCommand(data)
 
