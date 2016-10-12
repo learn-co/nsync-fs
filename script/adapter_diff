@@ -1,14 +1,17 @@
 #!/bin/bash
+# first arg: path/to/occurences
+# second arg: path/to/coverage
+# eg. nsync-fs/script/adapter_diff learn-ide-tree/lib/* nsync-fs/src/adapters/*
 
-grep -ohr "fs\.\w*[(| ]" * --exclude-dir=node_modules --exclude-dir=learn-ide --exclude-dir=script | sed 's/^fs\.\(.*\).$/\1/' | sort -u > fs_occurences
-grep -ohr "shell\.\w*[(| ]" * --exclude-dir=node_modules --exclude-dir=learn-ide --exclude-dir=script | sed 's/^shell\.\(.*\).$/\1/' | sort -u > shell_occurences
+grep -ohr "fs\.\w*[(| ]" $1 | sed 's/^fs\.\(.*\).$/\1/' | sort -u > fs_occurences
+grep -ohr "shell\.\w*[(| ]" $1 | sed 's/^shell\.\(.*\).$/\1/' | sort -u > shell_occurences
 cat fs_occurences shell_occurences | sort -u > occurences
-grep -ohr "\w*: [(|-]" learn-ide/adapters/* | sed 's/.\{3\}$//' | grep -v "constructor" | sort -u > coverage
+grep -ohr "\w*: [(|-]" $2 | sed 's/.\{3\}$//' | grep -v "constructor" | sort -u > coverage
 
 echo "Diff of adapter usage vs coverage:"
 diff occurences coverage
 rm fs_occurences shell_occurences occurences coverage
 
 echo "fs-plus references:"
-ag 'fs-plus' --ignore-dir=spec --ignore-dir=learn-ide --ignore-dir=script --ignore=package.json
+ag 'fs-plus' $1
 
