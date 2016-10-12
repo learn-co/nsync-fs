@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
-shell = require 'shell'
+trash = require 'trash'
 
 module.exports = sync = (virtualFileSystem, {path, pathAttributes}) ->
   console.log 'SYNC:', path
@@ -14,7 +14,7 @@ module.exports = sync = (virtualFileSystem, {path, pathAttributes}) ->
     existingRemotePaths = node.map (e) -> e.localPath()
     existingLocalPaths = fs.listTreeSync(localPath)
     localPathsToRemove = _.difference(existingLocalPaths, existingRemotePaths)
-    localPathsToRemove.forEach (path) -> shell.moveItemToTrash(path)
+    trash(localPathsToRemove)
 
   node.findPathsToSync().then (paths) ->
     virtualFileSystem.fetch(paths)

@@ -1,5 +1,5 @@
 fs = require 'fs-plus'
-shell = require 'shell'
+trash = require 'trash'
 
 changeStrategies = {
   delete: (path, virtualFileSystem) ->
@@ -7,9 +7,7 @@ changeStrategies = {
 
     return unless node?
 
-    shell.moveItemToTrash node.localPath(), (err) ->
-      if err?
-        console.error 'Unable to move local file to trash:', err
+    trash([node.localPath()])
 
     node
 

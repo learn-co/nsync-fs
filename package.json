@@ -10,7 +10,7 @@
     "event-kit": "^1.0.0",
     "fs-plus": "^2.3.0",
     "graceful-fs": "^4.1.6",
-    "shell": "^0.3.2",
+    "trash": "^4.0.0",
     "underscore-plus": "^1.0.0"
   },
   "devDependencies": {
