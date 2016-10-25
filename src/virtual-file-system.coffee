@@ -84,14 +84,14 @@ class VirtualFileSystem
   activate: ->
     fs.readFile @cachedPrimaryNode, (err, data) =>
       if err?
-        console.error 'Unable to load cached primary node:', err
+        console.warn 'Unable to load cached primary node:', err
         @loading()
         return
 
       try
         serializedNode = JSON.parse(data)
       catch error
-        console.error 'Unable to parse cached primary node:', error
+        console.warn 'Unable to parse cached primary node:', error
         @loading()
         return
 

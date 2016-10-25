@@ -24,15 +24,13 @@ class FileSystemNode
 
       match
 
-  getRelative: (path) ->
-    @get("#{@path}/#{path}")
-
   pathEquals: (path) ->
     path is @path or path is @localPath()
 
   mayContain: (path) ->
-    @stats.isDirectory() and
-      (path.startsWith("#{@path}/") or path.startsWith("#{@localPath()}/"))
+    return false if not @stats.isDirectory()
+
+    path.startsWith("#{@path}/") or path.startsWith(@localPath() + _path.sep)
 
   has: (path) ->
     @get(path)?
