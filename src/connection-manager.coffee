@@ -4,6 +4,7 @@ onmessage= require './onmessage'
 module.exports =
 class ConnectionManager
   constructor: (@virtualFileSystem) ->
+    @pings = []
 
   connect: (@ws, @url, @opts) ->
     @websocket = new @ws(@url, @opts)
@@ -77,7 +78,6 @@ class ConnectionManager
   ping: ->
     return if not @connected
 
-    @pings ?= []
     timestamp = (new Date).toString()
     @pings.push(timestamp)
 
@@ -103,5 +103,7 @@ class ConnectionManager
 
   pong: (timestamp) ->
     i = @pings.indexOf(timestamp)
-    @pings.splice(i, 1)
+
+    if i > -1
+      @pings.splice(i, 1)
 
