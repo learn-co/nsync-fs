@@ -69,11 +69,11 @@ class FileSystemNode
       node
 
   setTree: (tree) ->
-    @tree =
-      if tree?
-        tree.map (entry) => new FileSystemNode(entry, this)
-      else
-        []
+    if not tree?
+      @tree = []
+    else
+      entries = tree.filter (entry) -> entry?
+      @tree = entries.map (entry) => new FileSystemNode(entry, this)
 
   setDigest: (digest) ->
     @digest = digest
