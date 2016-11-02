@@ -84,7 +84,8 @@ class ConnectionManager
     @sendPing {command: 'ping', timestamp}
     @waitForPong(timestamp)
 
-  waitForPong: (timestamp, secondsToWait = 3) ->
+  waitForPong: (timestamp) ->
+    secondsToWait = 4
     isRepeat = timestamp is @currentPing
     @currentPing = timestamp
 
@@ -99,7 +100,7 @@ class ConnectionManager
     if isRepeat
       @websocket.close()
     else
-      @waitForPong(timestamp, 5)
+      @waitForPong(timestamp)
 
   pong: (timestamp) ->
     i = @pings.indexOf(timestamp)
