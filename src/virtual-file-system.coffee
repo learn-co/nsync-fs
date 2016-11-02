@@ -59,6 +59,9 @@ class VirtualFileSystem
   loading: ->
     @emitter.emit('will-load')
 
+  opened: (file) ->
+    @emitter.emit('did-open', file)
+
   receivedCustomCommand: (payload) ->
     @emitter.emit('did-receive-custom-command', payload)
 
@@ -217,4 +220,7 @@ class VirtualFileSystem
 
   onDidUpdate: (callback) ->
     @emitter.on 'did-update', callback
+
+  onDidOpen: (callback) ->
+    @emitter.on 'did-open', callback
 
