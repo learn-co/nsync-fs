@@ -29,7 +29,6 @@ class ConnectionManager
       @successfulReconnect()
 
     @virtualFileSystem.activate()
-    @virtualFileSystem.init()
 
   onClose: (event) ->
     console.warn 'WS CLOSED:', event
