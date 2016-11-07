@@ -47,6 +47,11 @@ class VirtualFileSystem
       data = JSON.stringify(@serialize())
       fs.writeFile(@cachedPrimaryNode, data)
 
+  flushCache: ->
+    fs.remove @cachedPrimaryNode, (err) ->
+      if err?
+        console.warn 'Unable to flush cache:', err
+
   disconnected: (msg) ->
     @emitter.emit('did-disconnect', msg)
 
