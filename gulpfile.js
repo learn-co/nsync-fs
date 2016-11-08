@@ -46,7 +46,7 @@ gulp.task('push', function (done) {
 });
 
 gulp.task('tag', function (done) {
-  git.tag(version, 'Created Tag for version: ' + getVersion(), function (error) {
+  git.tag('v' + getVersion(), 'Created Tag for version: ' + getVersion(), function (error) {
     if (error) {
       return done(error);
     }
