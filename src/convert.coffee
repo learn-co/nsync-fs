@@ -1,6 +1,6 @@
 _path = require 'path'
 
-class PathConverter
+class Convert
   constructor: (@localRoot, @remotePlatform = 'posix') ->
 
   configure: ({localRoot, remotePlatform}) ->
@@ -21,5 +21,5 @@ class PathConverter
 
     _path.join(@localRoot, remotePath)
 
-module.exports = new PathConverter
+module.exports = new Convert
 

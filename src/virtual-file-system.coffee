@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 _path = require 'path'
-convert = require './util/path-converter'
+convert = require './convert'
 fs = require 'fs-plus'
 shell = require 'shell'
 {Emitter} = require 'event-kit'

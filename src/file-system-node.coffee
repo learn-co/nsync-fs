@@ -2,7 +2,7 @@ Stat = require './stat'
 fs = require 'graceful-fs'
 _path = require 'path'
 crypto = require 'crypto'
-convert = require './util/path-converter'
+convert = require './convert'
 
 module.exports =
 class FileSystemNode
