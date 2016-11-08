@@ -1,3 +1,3 @@
-module.exports = error = (virtualFileSystem, {event, error}) ->
+module.exports = error = (nsync, {event, error}) ->
   console.log 'Error:', event, error
 

@@ -20,7 +20,7 @@ messageStrategies = {
   sync
 }
 
-module.exports = onmessage = (message, virtualFileSystem) ->
+module.exports = onmessage = (message, nsync) ->
 
   try
     {type, data} = JSON.parse(message)
@@ -33,4 +33,4 @@ module.exports = onmessage = (message, virtualFileSystem) ->
   if not strategy?
     console.error "Unhandled message type: #{type}"
   else
-    strategy(virtualFileSystem, data)
+    strategy(nsync, data)

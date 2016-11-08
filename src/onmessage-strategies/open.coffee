@@ -1,7 +1,7 @@
 fs = require 'fs-plus'
 
-module.exports = open = (virtualFileSystem, {path, content}) ->
-  node = virtualFileSystem.getNode(path)
+module.exports = open = (nsync, {path, content}) ->
+  node = nsync.getNode(path)
   if not node?
     return console.warn 'Unable to find node with path:', path
 
@@ -15,5 +15,5 @@ module.exports = open = (virtualFileSystem, {path, content}) ->
   fs.writeFile node.localPath(), contentBuffer, {mode: stats.mode}, (err) ->
     if err?
       return console.error 'WRITE ERR', err
-    virtualFileSystem.opened({path: node.path, localPath: node.localPath()})
+    nsync.opened({path: node.path, localPath: node.localPath()})
 

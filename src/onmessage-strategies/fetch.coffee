@@ -1,7 +1,7 @@
 fs = require 'fs-plus'
 
-module.exports = fetch = (virtualFileSystem, {path, content}) ->
-  node = virtualFileSystem.getNode(path)
+module.exports = fetch = (nsync, {path, content}) ->
+  node = nsync.getNode(path)
   if not node?
     return console.warn 'Unable to find node with path:', path
 

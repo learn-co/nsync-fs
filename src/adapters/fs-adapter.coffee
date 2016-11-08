@@ -2,11 +2,11 @@ fs = require 'fs-plus'
 
 module.exports =
 class FSAdapter
-  constructor: (@virtualFileSystem) ->
+  constructor: (@nsync) ->
     # noop
 
   existsSync: (path) ->
-    @virtualFileSystem.hasPath(path)
+    @nsync.hasPath(path)
 
   isBinaryExtension: (ext) ->
     fs.isBinaryExtension(ext)
@@ -18,10 +18,10 @@ class FSAdapter
     fs.isCompressedExtension(ext)
 
   isDirectorySync: (path) ->
-    @virtualFileSystem.isDirectory(path)
+    @nsync.isDirectory(path)
 
   isFileSync: (path) ->
-    @virtualFileSystem.isFile(path)
+    @nsync.isFile(path)
 
   isImageExtension: (ext) ->
     fs.isImageExtension(ext)
@@ -33,50 +33,50 @@ class FSAdapter
     fs.isReadmePath(path)
 
   isSymbolicLinkSync: (path) ->
-    @virtualFileSystem.isSymbolicLink(path)
+    @nsync.isSymbolicLink(path)
 
   lstatSyncNoException: (path) ->
-    @virtualFileSystem.lstat(path)
+    @nsync.lstat(path)
 
   listSync: (path, extensions) ->
-    @virtualFileSystem.list(path, extensions)
+    @nsync.list(path, extensions)
 
   readFileSync: (path) ->
-    @virtualFileSystem.read(path)
+    @nsync.read(path)
 
   readdirSync: (path) ->
-    @virtualFileSystem.readdir(path)
+    @nsync.readdir(path)
 
   realpathSync: (path) ->
-    @virtualFileSystem.realpath(path)
+    @nsync.realpath(path)
 
   realpath: (path) ->
-    @virtualFileSystem.realpath(path)
+    @nsync.realpath(path)
 
   statSync: (path) ->
-    @virtualFileSystem.stat(path) or
+    @nsync.stat(path) or
       throw new Error("No virtual entry (file or directory) could be found by the given path '#{path}'")
 
   statSyncNoException: (path) ->
-    @virtualFileSystem.stat(path)
+    @nsync.stat(path)
 
   absolute: -> # currently used only in spec
     atom.notifications.addWarning('Unadapted fs function', detail: 'absolute')
 
   copy: (source, destination) ->
-    @virtualFileSystem.cp(source, destination)
+    @nsync.cp(source, destination)
 
   copySync: (source, destination) ->
-    @virtualFileSystem.cp(source, destination)
+    @nsync.cp(source, destination)
 
   makeTreeSync: (path) ->
-    @virtualFileSystem.mkdirp(path)
+    @nsync.mkdirp(path)
 
   moveSync: (source, destination) ->
-    @virtualFileSystem.mv(source, destination)
+    @nsync.mv(source, destination)
 
   writeFileSync: (path) ->
-    @virtualFileSystem.touch(path)
+    @nsync.touch(path)
 
   mkdirSync: -> # currently used only in spec
     atom.notifications.addWarning('Unadapted fs function', detail: 'mkdirSync')

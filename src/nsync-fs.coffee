@@ -9,8 +9,7 @@ FSAdapter = require './adapters/fs-adapter'
 FilesystemNode = require './filesystem-node'
 ShellAdapter = require './adapters/shell-adapter'
 
-module.exports =
-class VirtualFileSystem
+class Nsync
   constructor: ->
     @emitter = new Emitter
     @fs = new FSAdapter(this)
@@ -228,4 +227,6 @@ class VirtualFileSystem
 
   onDidOpen: (callback) ->
     @emitter.on 'did-open', callback
+
+module.exports = new Nsync
 
