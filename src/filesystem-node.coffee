@@ -5,7 +5,7 @@ crypto = require 'crypto'
 convert = require './convert'
 
 module.exports =
-class FileSystemNode
+class FilesystemNode
   constructor: ({@name, @path, @digest, tree, stat}, @parent) ->
     @stats = new Stat(stat)
     @setTree(tree)
@@ -64,7 +64,7 @@ class FileSystemNode
     if parent.has(serializedNode.path)
       return @update(serializedNode)
     else
-      node = new FileSystemNode(serializedNode, parent)
+      node = new FilesystemNode(serializedNode, parent)
       parent.tree.push(node)
       node
 
@@ -73,7 +73,7 @@ class FileSystemNode
       @tree = []
     else
       entries = tree.filter (entry) -> entry?
-      @tree = entries.map (entry) => new FileSystemNode(entry, this)
+      @tree = entries.map (entry) => new FilesystemNode(entry, this)
 
   setDigest: (digest) ->
     @digest = digest

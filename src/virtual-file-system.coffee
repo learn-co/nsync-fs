@@ -6,7 +6,7 @@ shell = require 'shell'
 {Emitter} = require 'event-kit'
 Connection = require './connection'
 FSAdapter = require './adapters/fs-adapter'
-FileSystemNode = require './file-system-node'
+FilesystemNode = require './filesystem-node'
 ShellAdapter = require './adapters/shell-adapter'
 
 module.exports =
@@ -15,7 +15,7 @@ class VirtualFileSystem
     @emitter = new Emitter
     @fs = new FSAdapter(this)
     @shell = new ShellAdapter(this)
-    @primaryNode = new FileSystemNode({})
+    @primaryNode = new FilesystemNode({})
     @connection = new Connection(this)
 
   configure: ({@expansionState, @localRoot, connection}) ->
@@ -81,7 +81,7 @@ class VirtualFileSystem
     @setPrimaryNode(serializedNode)
 
   setPrimaryNode: (serializedNode) ->
-    @primaryNode = new FileSystemNode(serializedNode)
+    @primaryNode = new FilesystemNode(serializedNode)
 
     localPath = @primaryNode.localPath()
     @emitter.emit('did-set-primary', {localPath, @expansionState})
