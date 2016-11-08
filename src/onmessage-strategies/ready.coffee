@@ -1,3 +1,3 @@
-module.exports = ready = (virtualFileSystem) ->
-  virtualFileSystem.init()
+module.exports = ready = (nsync) ->
+  nsync.init()
 

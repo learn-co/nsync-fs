@@ -2,9 +2,9 @@ _ = require 'underscore-plus'
 fs = require 'fs-plus'
 trash = require 'trash'
 
-module.exports = sync = (virtualFileSystem, {path, pathAttributes}) ->
+module.exports = sync = (nsync, {path, pathAttributes}) ->
   console.log 'SYNC:', path
-  node = virtualFileSystem.getNode(path)
+  node = nsync.getNode(path)
   localPath = node.localPath()
 
   node.traverse (entry) ->
@@ -17,5 +17,5 @@ module.exports = sync = (virtualFileSystem, {path, pathAttributes}) ->
     trash(localPathsToRemove)
 
   node.findPathsToSync().then (paths) ->
-    virtualFileSystem.fetch(paths)
+    nsync.fetch(paths)
 

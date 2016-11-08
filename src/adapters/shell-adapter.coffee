@@ -1,9 +1,9 @@
 module.exports =
 class ShellAdapter
-  constructor: (@virtualFileSystem) ->
+  constructor: (@nsync) ->
     # noop
 
   moveItemToTrash: (path) ->
-    @virtualFileSystem.rm(path)
+    @nsync.rm(path)
     true
 

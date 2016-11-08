@@ -1,28 +1,27 @@
 _ = require 'underscore-plus'
 _path = require 'path'
-convert = require './util/path-converter'
+convert = require './convert'
 fs = require 'fs-plus'
 shell = require 'shell'
 {Emitter} = require 'event-kit'
-ConnectionManager = require './connection-manager'
+Connection = require './connection'
 FSAdapter = require './adapters/fs-adapter'
-FileSystemNode = require './file-system-node'
+FilesystemNode = require './filesystem-node'
 ShellAdapter = require './adapters/shell-adapter'
 
-module.exports =
-class VirtualFileSystem
+class Nsync
   constructor: ->
     @emitter = new Emitter
     @fs = new FSAdapter(this)
     @shell = new ShellAdapter(this)
-    @primaryNode = new FileSystemNode({})
-    @connectionManager = new ConnectionManager(this)
+    @primaryNode = new FilesystemNode({})
+    @connection = new Connection(this)
 
   configure: ({@expansionState, @localRoot, connection}) ->
     @setLocalPaths()
 
     {websocket, url, opts} = connection
-    @connectionManager.connect(websocket, url, opts)
+    @connection.connect(websocket, url, opts)
 
     @emitter.emit('did-configure')
 
@@ -81,7 +80,7 @@ class VirtualFileSystem
     @setPrimaryNode(serializedNode)
 
   setPrimaryNode: (serializedNode) ->
-    @primaryNode = new FileSystemNode(serializedNode)
+    @primaryNode = new FilesystemNode(serializedNode)
 
     localPath = @primaryNode.localPath()
     @emitter.emit('did-set-primary', {localPath, @expansionState})
@@ -114,7 +113,7 @@ class VirtualFileSystem
       else
         convertedMsg[key] = value
 
-    @connectionManager.send(convertedMsg)
+    @connection.send(convertedMsg)
 
   # ------------------
   # File introspection
@@ -228,4 +227,6 @@ class VirtualFileSystem
 
   onDidOpen: (callback) ->
     @emitter.on 'did-open', callback
+
+module.exports = new Nsync
 
