@@ -5,6 +5,7 @@ fetch = require './onmessage-strategies/fetch'
 init = require './onmessage-strategies/init'
 open = require './onmessage-strategies/open'
 pong = require './onmessage-strategies/pong'
+ready = require './onmessage-strategies/ready'
 sync = require './onmessage-strategies/sync'
 
 messageStrategies = {
@@ -15,7 +16,8 @@ messageStrategies = {
   init,
   open,
   pong,
-  sync,
+  ready,
+  sync
 }
 
 module.exports = onmessage = (message, virtualFileSystem) ->

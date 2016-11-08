@@ -16,8 +16,12 @@
   "devDependencies": {
     "coffee-script": "^1.11.1",
     "coffeelint": "^1.9.7",
-    "gulp": "3.9.1",
+    "gulp": "^3.9.1",
+    "gulp-bump": "^2.5.0",
+    "gulp-coffee": "^2.3.2",
+    "gulp-git": "^1.12.0",
     "gulp-util": "3.0.7",
+    "run-sequence": "^1.2.2",
     "shelljs": "0.7.3",
     "ssh2": "0.5.0"
   }
