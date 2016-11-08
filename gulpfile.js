@@ -7,6 +7,7 @@ var gutil = require('gulp-util');
 var git = require('gulp-git');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
+var rimraf = require('rimraf');
 
 function getVersion() {
   // We parse the json file instead of using require because require caches
@@ -18,10 +19,14 @@ gulp.task('default', function(done) {
   runSequence('coffee', done);
 });
 
-gulp.task('coffee', function() {
-  gulp.src('./src/*.coffee')
-    .pipe(coffee({bare: true}).on('error', gutil.log))
-    .pipe(gulp.dest('./lib/'));
+gulp.task('coffee', function(done) {
+  rimraf('./lib', function() {
+    gulp.src('./src/**/*')
+      .pipe(coffee({bare: true}).on('error', gutil.log))
+      .pipe(gulp.dest('./lib/'));
+
+    done()
+  });
 });
 
 gulp.task('bump', function () {
