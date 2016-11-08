@@ -2,7 +2,7 @@ _path = require 'path'
 onmessage= require './onmessage'
 
 module.exports =
-class ConnectionManager
+class Connection
   constructor: (@virtualFileSystem) ->
     @pings = []
 

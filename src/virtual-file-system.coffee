@@ -4,7 +4,7 @@ convert = require './util/path-converter'
 fs = require 'fs-plus'
 shell = require 'shell'
 {Emitter} = require 'event-kit'
-ConnectionManager = require './connection-manager'
+Connection = require './connection'
 FSAdapter = require './adapters/fs-adapter'
 FileSystemNode = require './file-system-node'
 ShellAdapter = require './adapters/shell-adapter'
@@ -16,13 +16,13 @@ class VirtualFileSystem
     @fs = new FSAdapter(this)
     @shell = new ShellAdapter(this)
     @primaryNode = new FileSystemNode({})
-    @connectionManager = new ConnectionManager(this)
+    @connection = new Connection(this)
 
   configure: ({@expansionState, @localRoot, connection}) ->
     @setLocalPaths()
 
     {websocket, url, opts} = connection
-    @connectionManager.connect(websocket, url, opts)
+    @connection.connect(websocket, url, opts)
 
     @emitter.emit('did-configure')
 
@@ -114,7 +114,7 @@ class VirtualFileSystem
       else
         convertedMsg[key] = value
 
-    @connectionManager.send(convertedMsg)
+    @connection.send(convertedMsg)
 
   # ------------------
   # File introspection
