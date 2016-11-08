@@ -2,8 +2,8 @@ _path = require 'path'
 onmessage= require './onmessage'
 
 module.exports =
-class ConnectionManager
-  constructor: (@virtualFileSystem) ->
+class Connection
+  constructor: (@nsync) ->
     @pings = []
 
   connect: (@ws, @url, @opts) ->
@@ -13,7 +13,7 @@ class ConnectionManager
       @onOpen(event)
 
     @websocket.on 'message', (event) =>
-      onmessage(event, @virtualFileSystem)
+      onmessage(event, @nsync)
 
     @websocket.on 'error', (err) =>
       @onClose(err)
@@ -28,13 +28,13 @@ class ConnectionManager
     if @reconnecting
       @successfulReconnect()
 
-    @virtualFileSystem.activate()
+    @nsync.activate()
 
   onClose: (event) ->
     console.warn 'WS CLOSED:', event
 
     if @connected and not @reconnecting
-      @virtualFileSystem.disconnected()
+      @nsync.disconnected()
 
     @connected = false
     @reconnect()
@@ -42,7 +42,7 @@ class ConnectionManager
   send: (msg) ->
     if not @connected
       msg = 'The operation cannot be performed while disconnected'
-      @virtualFileSystem.disconnected(msg)
+      @nsync.disconnected(msg)
 
     console.log 'SEND:', msg
     payload = JSON.stringify(msg)
@@ -56,7 +56,7 @@ class ConnectionManager
   reconnect: ->
     unless @reconnecting
       @reconnecting = true
-      @virtualFileSystem.connecting()
+      @nsync.connecting()
 
     secondsBetweenAttempts = 5
     setTimeout =>
@@ -65,7 +65,7 @@ class ConnectionManager
 
   successfulReconnect: ->
     @reconnecting = false
-    @virtualFileSystem.connected()
+    @nsync.connected()
 
   startPingsAfterInit: ->
     # TODO: something cleaner, this simply waits n minutes after init is sent

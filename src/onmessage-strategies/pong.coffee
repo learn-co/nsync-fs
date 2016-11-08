@@ -1,3 +1,3 @@
-module.exports = init = (virtualFileSystem, {timestamp}) ->
-  virtualFileSystem.connectionManager.pong(timestamp)
+module.exports = init = (nsync, {timestamp}) ->
+  nsync.connection.pong(timestamp)
 

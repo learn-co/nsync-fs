@@ -2,8 +2,8 @@ fs = require 'fs-plus'
 trash = require 'trash'
 
 changeStrategies = {
-  delete: (path, virtualFileSystem) ->
-    node = virtualFileSystem.primaryNode.remove(path)
+  delete: (path, nsync) ->
+    node = nsync.primaryNode.remove(path)
 
     return unless node?
 
@@ -11,8 +11,8 @@ changeStrategies = {
 
     node
 
-  moved_from: (path, virtualFileSystem) ->
-    node = virtualFileSystem.primaryNode.remove(path)
+  moved_from: (path, nsync) ->
+    node = nsync.primaryNode.remove(path)
 
     return unless node?
 
@@ -26,39 +26,39 @@ changeStrategies = {
 
     node
 
-  create: (path, virtualFileSystem, virtualFile) ->
-    node = virtualFileSystem.primaryNode.add(virtualFile)
+  create: (path, nsync, virtualFile) ->
+    node = nsync.primaryNode.add(virtualFile)
 
     node.findPathsToSync().then (paths) ->
-      virtualFileSystem.fetch(paths)
+      nsync.fetch(paths)
 
     node
 
-  moved_to: (path, virtualFileSystem, virtualFile) ->
-    changeStrategies.create(path, virtualFileSystem, virtualFile)
+  moved_to: (path, nsync, virtualFile) ->
+    changeStrategies.create(path, nsync, virtualFile)
 
-  close_write: (path, virtualFileSystem, virtualFile) ->
-    node = virtualFileSystem.primaryNode.update(virtualFile)
-    virtualFileSystem.updated(node)
+  close_write: (path, nsync, virtualFile) ->
+    node = nsync.primaryNode.update(virtualFile)
+    nsync.updated(node)
 
     node.determineSync().then (shouldSync) ->
       if shouldSync
-        virtualFileSystem.fetch(node.path)
+        nsync.fetch(node.path)
 
     node
 }
 
-module.exports = change = (virtualFileSystem, {event, path, virtualFile}) ->
+module.exports = change = (nsync, {event, path, virtualFile}) ->
   console.log "#{event.toUpperCase()}:", path
   strategy = changeStrategies[event]
 
   if not strategy?
     return console.warn 'No strategy for change event:', event, path
 
-  node = strategy(path, virtualFileSystem, virtualFile)
+  node = strategy(path, nsync, virtualFile)
 
   if not node?
     return console.warn 'Change strategy did not return node:', event, strategy
 
-  virtualFileSystem.changed(node)
+  nsync.changed(node)
 

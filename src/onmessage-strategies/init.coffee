@@ -1,4 +1,4 @@
-module.exports = init = (virtualFileSystem, {virtualFile}) ->
-  virtualFileSystem.setPrimaryNode(virtualFile)
-  virtualFileSystem.syncPrimaryNode()
+module.exports = init = (nsync, {virtualFile}) ->
+  nsync.setPrimaryNode(virtualFile)
+  nsync.syncPrimaryNode()
 
