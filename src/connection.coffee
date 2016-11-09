@@ -1,12 +1,14 @@
 _path = require 'path'
 onmessage= require './onmessage'
+logger = require './logger'
+SingleSocket = require 'single-socket'
 
 module.exports =
 class Connection
   constructor: (@nsync) ->
     @pings = []
 
-  connect: (@ws, @url, @opts) ->
+  connect: (@url, @opts, @ws = SingleSocket) ->
     @websocket = new @ws(@url, @opts)
 
     @websocket.on 'open', (event) =>
@@ -31,7 +33,7 @@ class Connection
     @nsync.activate()
 
   onClose: (event) ->
-    console.warn 'WS CLOSED:', event
+    logger.warn 'WS CLOSED:', event
 
     if @connected and not @reconnecting
       @nsync.disconnected()
@@ -44,12 +46,12 @@ class Connection
       msg = 'The operation cannot be performed while disconnected'
       @nsync.disconnected(msg)
 
-    console.log 'SEND:', msg
+    logger.info 'SEND:', msg
     payload = JSON.stringify(msg)
     @websocket.send(payload)
 
   sendPing: (msg) ->
-    console.log 'SEND:', 'ping'
+    logger.info 'SEND:', 'ping'
     payload = JSON.stringify(msg)
     @websocket.send(payload)
 

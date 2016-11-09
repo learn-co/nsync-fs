@@ -1,5 +1,6 @@
 fs = require 'fs-plus'
 trash = require 'trash'
+logger = require '../logger'
 
 changeStrategies = {
   delete: (path, nsync) ->
@@ -22,7 +23,7 @@ changeStrategies = {
 
     fs.remove node.localPath(), (err) ->
       if err?
-        console.error 'Unable to remove local file:', err
+        logger.error 'Unable to remove local file:', err
 
     node
 
@@ -49,16 +50,16 @@ changeStrategies = {
 }
 
 module.exports = change = (nsync, {event, path, virtualFile}) ->
-  console.log "#{event.toUpperCase()}:", path
+  logger.info "#{event.toUpperCase()}:", path
   strategy = changeStrategies[event]
 
   if not strategy?
-    return console.warn 'No strategy for change event:', event, path
+    return logger.warn 'No strategy for change event:', event, path
 
   node = strategy(path, nsync, virtualFile)
 
   if not node?
-    return console.warn 'Change strategy did not return node:', event, strategy
+    return logger.warn 'Change strategy did not return node:', event, strategy
 
   nsync.changed(node)
 

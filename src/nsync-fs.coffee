@@ -2,7 +2,10 @@ _ = require 'underscore-plus'
 _path = require 'path'
 convert = require './convert'
 fs = require 'fs-plus'
+os = require 'os'
 shell = require 'shell'
+logger = require './logger'
+winston = require 'winston'
 {Emitter} = require 'event-kit'
 Connection = require './connection'
 FSAdapter = require './adapters/fs-adapter'
@@ -17,11 +20,14 @@ class Nsync
     @primaryNode = new FilesystemNode({})
     @connection = new Connection(this)
 
-  configure: ({@expansionState, @localRoot, connection}) ->
+  configure: ({@expansionState, @localRoot, connection, logFile}) ->
+    logFile ?= _path.join(os.homedir(), '.nsync-fs.log')
+    logger.add(winston.transports.File, {filename: logFile, level: 'info'})
+
     @setLocalPaths()
 
     {websocket, url, opts} = connection
-    @connection.connect(websocket, url, opts)
+    @connection.connect(url, opts, websocket)
 
     @emitter.emit('did-configure')
 
@@ -49,7 +55,7 @@ class Nsync
   flushCache: ->
     fs.remove @cachedPrimaryNode, (err) ->
       if err?
-        console.warn 'Unable to flush cache:', err
+        logger.warn 'Unable to flush cache:', err
 
   disconnected: (msg) ->
     @emitter.emit('did-disconnect', msg)
@@ -91,14 +97,14 @@ class Nsync
   activate: ->
     fs.readFile @cachedPrimaryNode, (err, data) =>
       if err?
-        console.warn 'Unable to load cached primary node:', err
+        logger.warn 'Unable to load cached primary node:', err
         @loading()
         return
 
       try
         serializedNode = JSON.parse(data)
       catch error
-        console.warn 'Unable to parse cached primary node:', error
+        logger.warn 'Unable to parse cached primary node:', error
         @loading()
         return
 
