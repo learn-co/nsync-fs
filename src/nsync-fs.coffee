@@ -2,6 +2,7 @@ _ = require 'underscore-plus'
 _path = require 'path'
 convert = require './convert'
 fs = require 'fs-plus'
+os = require 'os'
 shell = require 'shell'
 logger = require './logger'
 winston = require 'winston'
@@ -20,7 +21,9 @@ class Nsync
     @connection = new Connection(this)
 
   configure: ({@expansionState, @localRoot, connection, logFile}) ->
-    logger.add(winston.transports.File, { filename: logFile })
+    logFile ?= _path.join(os.homedir(), '.nsync-fs.log')
+    logger.add(winston.transports.File, {filename: logFile, level: 'info'})
+
     @setLocalPaths()
 
     {websocket, url, opts} = connection

@@ -50,7 +50,7 @@ changeStrategies = {
 }
 
 module.exports = change = (nsync, {event, path, virtualFile}) ->
-  logger.log "#{event.toUpperCase()}:", path
+  logger.info "#{event.toUpperCase()}:", path
   strategy = changeStrategies[event]
 
   if not strategy?

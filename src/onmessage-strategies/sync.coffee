@@ -4,7 +4,7 @@ trash = require 'trash'
 logger = require '../logger'
 
 module.exports = sync = (nsync, {path, pathAttributes}) ->
-  logger.log 'SYNC:', path
+  logger.info 'SYNC:', path
   node = nsync.getNode(path)
   localPath = node.localPath()
 

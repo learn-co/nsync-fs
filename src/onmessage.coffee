@@ -25,7 +25,7 @@ module.exports = onmessage = (message, nsync) ->
 
   try
     {type, data} = JSON.parse(message)
-    logger.log 'RECEIVED:', type
+    logger.info 'RECEIVED:', type
   catch err
     return logger.error 'ERROR PARSING MESSAGE:', err
 
