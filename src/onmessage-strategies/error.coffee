@@ -1,3 +1,5 @@
+logger = require '../logger'
+
 module.exports = error = (nsync, {event, error}) ->
-  console.log 'Error:', event, error
+  logger.log 'Error:', event, error
 

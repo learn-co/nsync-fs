@@ -1,9 +1,10 @@
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
 trash = require 'trash'
+logger = require '../logger'
 
 module.exports = sync = (nsync, {path, pathAttributes}) ->
-  console.log 'SYNC:', path
+  logger.log 'SYNC:', path
   node = nsync.getNode(path)
   localPath = node.localPath()
 

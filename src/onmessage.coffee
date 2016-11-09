@@ -1,3 +1,4 @@
+logger = require './logger'
 change = require './onmessage-strategies/change'
 customCommand = require './onmessage-strategies/custom-command'
 error = require './onmessage-strategies/error'
@@ -24,13 +25,13 @@ module.exports = onmessage = (message, nsync) ->
 
   try
     {type, data} = JSON.parse(message)
-    console.log 'RECEIVED:', type
+    logger.log 'RECEIVED:', type
   catch err
-    return console.error 'ERROR PARSING MESSAGE:', err
+    return logger.error 'ERROR PARSING MESSAGE:', err
 
   strategy = messageStrategies[type]
 
   if not strategy?
-    console.error "Unhandled message type: #{type}"
+    logger.error "Unhandled message type: #{type}"
   else
     strategy(nsync, data)
