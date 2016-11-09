@@ -19,8 +19,8 @@ class Nsync
     @primaryNode = new FilesystemNode({})
     @connection = new Connection(this)
 
-  configure: ({@expansionState, @localRoot, connection, logPath}) ->
-    logger.add(winston.transports.File, { filename: logPath })
+  configure: ({@expansionState, @localRoot, connection, logFile}) ->
+    logger.add(winston.transports.File, { filename: logFile })
     @setLocalPaths()
 
     {websocket, url, opts} = connection
