@@ -2,26 +2,40 @@ _path = require 'path'
 onmessage= require './onmessage'
 logger = require './logger'
 SingleSocket = require 'single-socket'
+remote = require 'remote'
+BrowserWindow = remote.require('browser-window')
+pagebus = require('page-bus')
+bus = pagebus()
 
 module.exports =
 class Connection
   constructor: (@nsync) ->
+    console.log('nsync starting up')
     @pings = []
 
   connect: (@url, @opts, @ws = SingleSocket) ->
-    @websocket = new @ws(@url, @opts)
+    localStorage.setItem('fs:endpoint', @url)
 
-    @websocket.on 'open', (event) =>
+    @activateWebsocket()
+
+    bus.on 'open', (event) =>
       @onOpen(event)
 
-    @websocket.on 'message', (event) =>
+    bus.on 'message', (event) =>
       onmessage(event, @nsync)
 
-    @websocket.on 'error', (err) =>
+    bus.on 'error', (err) =>
       @onClose(err)
 
-    @websocket.on 'close', (event) =>
+    bus.on 'close', (event) =>
       @onClose(event)
+
+  activateWebsocket: ->
+    # if !localStorage.getItem('fs:websocket:started')
+    localStorage.setItem('fs:websocket:started', true)
+    wsWindow = new BrowserWindow({show: true, webPreferences: {devTools: true}})
+    wsWindow.loadURL("file://#{ _path.join(__dirname, 'websocket.html') }")
+    wsWindow.webContents.openDevTools()
 
   onOpen: (event) ->
     @connected = true
@@ -48,7 +62,7 @@ class Connection
 
     logger.info 'SEND:', msg
     payload = JSON.stringify(msg)
-    @websocket.send(payload)
+    bus.emit('send', payload)
 
   sendPing: (msg) ->
     logger.info 'SEND:', 'ping'
