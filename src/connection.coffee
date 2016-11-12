@@ -1,7 +1,6 @@
 _path = require 'path'
 onmessage= require './onmessage'
 logger = require './logger'
-SingleSocket = require 'single-socket'
 remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
 pagebus = require('page-bus')
