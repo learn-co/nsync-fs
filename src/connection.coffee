@@ -1,26 +1,30 @@
 _path = require 'path'
 onmessage= require './onmessage'
 logger = require './logger'
-SingleSocket = require 'single-socket'
+remote = require 'remote'
+BrowserWindow = remote.require('browser-window')
+pagebus = require('page-bus')
+bus = pagebus()
+AtomSocket = require('atom-socket')
 
 module.exports =
 class Connection
   constructor: (@nsync) ->
     @pings = []
 
-  connect: (@url, @opts, @ws = SingleSocket) ->
-    @websocket = new @ws(@url, @opts)
+  connect: (@url, @opts) ->
+    @socket = new AtomSocket('fs', @url)
 
-    @websocket.on 'open', (event) =>
+    @socket.on 'open', (event) =>
       @onOpen(event)
 
-    @websocket.on 'message', (event) =>
+    @socket.on 'message', (event) =>
       onmessage(event, @nsync)
 
-    @websocket.on 'error', (err) =>
+    @socket.on 'error', (err) =>
       @onClose(err)
 
-    @websocket.on 'close', (event) =>
+    @socket.on 'close', (event) =>
       @onClose(event)
 
   onOpen: (event) ->
@@ -48,12 +52,12 @@ class Connection
 
     logger.info 'SEND:', msg
     payload = JSON.stringify(msg)
-    @websocket.send(payload)
+    @socket.send(payload)
 
   sendPing: (msg) ->
     logger.info 'SEND:', 'ping'
     payload = JSON.stringify(msg)
-    @websocket.send(payload)
+    @socket.send(payload)
 
   reconnect: ->
     unless @reconnecting
@@ -62,7 +66,7 @@ class Connection
 
     secondsBetweenAttempts = 5
     setTimeout =>
-      @connect(@ws, @url, @opts)
+      @connect(@url, @opts)
     , secondsBetweenAttempts * 1000
 
   successfulReconnect: ->
@@ -99,7 +103,7 @@ class Connection
       return @ping()
 
     if isRepeat
-      @websocket.close()
+      @socket.close()
     else
       @waitForPong(timestamp)
 

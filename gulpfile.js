@@ -16,7 +16,8 @@ function getVersion() {
 };
 
 gulp.task('default', function(done) {
-  runSequence('coffee', done);
+  runSequence('coffee');
+  gulp.watch('./src/**/*', ['coffee'])
 });
 
 gulp.task('coffee', function(done) {
