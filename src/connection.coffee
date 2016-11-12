@@ -6,7 +6,7 @@ remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
 pagebus = require('page-bus')
 bus = pagebus()
-SocketDrawer = require('socket-drawer')
+AtomSocket = require('atom-socket')
 
 module.exports =
 class Connection
@@ -14,7 +14,7 @@ class Connection
     @pings = []
 
   connect: (@url, @opts) ->
-    @socket = new SocketDrawer('fs', @url)
+    @socket = new AtomSocket('fs', @url)
 
     @socket.on 'open', (event) =>
       @onOpen(event)
