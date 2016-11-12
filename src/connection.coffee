@@ -6,36 +6,27 @@ remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
 pagebus = require('page-bus')
 bus = pagebus()
+SocketDrawer = require('socket-drawer')
 
 module.exports =
 class Connection
   constructor: (@nsync) ->
-    console.log('nsync starting up')
     @pings = []
 
-  connect: (@url, @opts, @ws = SingleSocket) ->
-    localStorage.setItem('fs:endpoint', @url)
+  connect: (@url, @opts) ->
+    @socket = new SocketDrawer('fs', @url)
 
-    @activateWebsocket()
-
-    bus.on 'open', (event) =>
+    @socket.on 'open', (event) =>
       @onOpen(event)
 
-    bus.on 'message', (event) =>
+    @socket.on 'message', (event) =>
       onmessage(event, @nsync)
 
-    bus.on 'error', (err) =>
+    @socket.on 'error', (err) =>
       @onClose(err)
 
-    bus.on 'close', (event) =>
+    @socket.on 'close', (event) =>
       @onClose(event)
-
-  activateWebsocket: ->
-    # if !localStorage.getItem('fs:websocket:started')
-    localStorage.setItem('fs:websocket:started', true)
-    wsWindow = new BrowserWindow({show: true, webPreferences: {devTools: true}})
-    wsWindow.loadURL("file://#{ _path.join(__dirname, 'websocket.html') }")
-    wsWindow.webContents.openDevTools()
 
   onOpen: (event) ->
     @connected = true
@@ -62,12 +53,12 @@ class Connection
 
     logger.info 'SEND:', msg
     payload = JSON.stringify(msg)
-    bus.emit('send', payload)
+    @socket.send(payload)
 
   sendPing: (msg) ->
     logger.info 'SEND:', 'ping'
     payload = JSON.stringify(msg)
-    @websocket.send(payload)
+    @socket.send(payload)
 
   reconnect: ->
     unless @reconnecting
@@ -76,7 +67,7 @@ class Connection
 
     secondsBetweenAttempts = 5
     setTimeout =>
-      @connect(@ws, @url, @opts)
+      @connect(@url, @opts)
     , secondsBetweenAttempts * 1000
 
   successfulReconnect: ->
@@ -113,7 +104,7 @@ class Connection
       return @ping()
 
     if isRepeat
-      @websocket.close()
+      @socket.close()
     else
       @waitForPong(timestamp)
 
