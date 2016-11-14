@@ -16,8 +16,14 @@ function getVersion() {
 };
 
 gulp.task('default', function(done) {
-  runSequence('coffee');
-  gulp.watch('./src/**/*', ['coffee'])
+  runSequence('coffee', 'coffee-watch', done);
+});
+
+gulp.task('coffee-watch', function(done) {
+  var watcher = gulp.watch('./src/**/*', ['coffee']);
+  watcher.on('change', function(event) {
+    console.log('File ' + event.path + ' was ' + event.type + ', running tasks...');
+  });
 });
 
 gulp.task('coffee', function(done) {
