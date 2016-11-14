@@ -48,9 +48,12 @@ class Nsync
     @primaryNode.serialize()
 
   cache: ->
-    if @hasPrimaryNode()
-      data = JSON.stringify(@serialize())
-      fs.writeFile(@cachedPrimaryNode, data)
+    new Promise (resolve, reject) =>
+      if @hasPrimaryNode()
+        data = JSON.stringify(@serialize())
+        fs.writeFile @cachedPrimaryNode, data, resolve
+      else
+        resolve()
 
   flushCache: ->
     fs.remove @cachedPrimaryNode, (err) ->
@@ -93,6 +96,11 @@ class Nsync
 
   syncPrimaryNode: ->
     @sync(@primaryNode.path)
+
+  activateFromExisting: ->
+    @cache().then =>
+      if not @hasPrimaryNode()
+        @activate()
 
   activate: ->
     fs.readFile @cachedPrimaryNode, (err, data) =>
