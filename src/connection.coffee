@@ -27,7 +27,14 @@ class Connection
     @socket.on 'close', (event) =>
       @onClose(event)
 
-  onOpen: (event) ->
+    @socket.on 'open:cached', (event) =>
+      @onCachedOpen(event)
+
+  onCachedOpen: ->
+    @onOpen()
+    @nsync.init()
+
+  onOpen: ->
     @connected = true
     @startPingsAfterInit()
 
