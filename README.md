@@ -1,12 +1,17 @@
 # nsync-fs
 Coming soon...
 
-## Development
-This module is written in coffeescript, if you are going to develop with it locally, you will need to transpile, which has been wrapped in the default `gulp` task:
+### Install
+```shell
+$ npm install nsync-fs --save
+```
+
+### Develop
+This project is written in coffescript, use the default `gulp` task to start watching `./src/` and compiling to `./lib/`:
 ```shell
 $ git clone https://github.com/learn-co/nsync-fs.git
 $ cd nsync-fs
 $ npm install
-$ gulp
 $ npm link
+$ gulp
 ```
