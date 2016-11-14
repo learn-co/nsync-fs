@@ -50,7 +50,7 @@ class Nsync
   cache: ->
     if @hasPrimaryNode()
       data = JSON.stringify(@serialize())
-      fs.writeFile @cachedPrimaryNode, data, resolve
+      fs.writeFile(@cachedPrimaryNode, data)
 
   flushCache: ->
     fs.remove @cachedPrimaryNode, (err) ->
