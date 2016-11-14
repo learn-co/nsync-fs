@@ -5,6 +5,9 @@
   "description": "A virtual file system for Atom, synchronized with a remote physical file system",
   "repository": "https://github.com/learn-co/nsync-fs",
   "license": "MIT",
+  "scripts": {
+    "prepublish": "gulp coffee"
+  },
   "dependencies": {
     "atom-socket": "0.0.2",
     "dotenv": "2.0.0",
