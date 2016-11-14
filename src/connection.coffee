@@ -31,13 +31,8 @@ class Connection
       @onCachedOpen(event)
 
   onCachedOpen: ->
-    @connected = true
-    @startPingsAfterInit()
-
-    if @reconnecting
-      @successfulReconnect()
-
-    @nsync.activateFromExisting()
+    @onOpen()
+    @nsync.init()
 
   onOpen: ->
     @connected = true
