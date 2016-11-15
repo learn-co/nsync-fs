@@ -18,7 +18,7 @@ class Nsync
     @primaryNode = new FilesystemNode({})
     @connection = new Connection(this)
 
-  configure: ({@expansionState, @localRoot, connection, logFile}) ->
+  configure: ({@expansionState, @localRoot, connection}) ->
     @setLocalPaths()
 
     {websocket, url, opts} = connection
