@@ -12,12 +12,11 @@
     "atom-socket": "0.0.3",
     "dotenv": "2.0.0",
     "event-kit": "1.0.0",
-    "fs-plus": "2.3.0",
+    "fs-plus": "^2.9.3",
     "graceful-fs": "4.1.6",
     "page-bus": "3.0.1",
     "trash": "4.0.0",
-    "underscore-plus": "1.0.0",
-    "winston": "2.3.0"
+    "underscore-plus": "1.0.0"
   },
   "devDependencies": {
     "coffee-script": "1.11.1",

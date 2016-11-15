@@ -1,6 +1,5 @@
 _path = require 'path'
 onmessage= require './onmessage'
-logger = require './logger'
 remote = require 'remote'
 BrowserWindow = remote.require('browser-window')
 pagebus = require('page-bus')
@@ -22,11 +21,11 @@ class Connection
       onmessage(event, @nsync)
 
     @socket.on 'error', (err) =>
-      logger.error 'nsync:connection:error', err
+      console.error 'nsync:error', err
       @onCloseOrError()
 
     @socket.on 'close', (event) =>
-      logger.error 'nsync:connection:closed', event
+      console.error 'nsync:closed', event
       @onCloseOrError()
 
     @socket.on 'open:cached', (event) =>
@@ -57,12 +56,12 @@ class Connection
       msg = 'The operation cannot be performed while disconnected'
       @nsync.disconnected(msg)
 
-    logger.info 'nsync:connection:send', msg
+    console.log 'nsync:send', msg
     payload = JSON.stringify(msg)
     @socket.send(payload)
 
   sendPing: (msg) ->
-    logger.info 'nsync:connection:send:ping'
+    console.log 'nsync:send:ping'
     payload = JSON.stringify(msg)
     @socket.send(payload)
 

@@ -1,4 +1,3 @@
-logger = require './logger'
 change = require './onmessage-strategies/change'
 customCommand = require './onmessage-strategies/custom-command'
 error = require './onmessage-strategies/error'
@@ -25,14 +24,14 @@ module.exports = onmessage = (message, nsync) ->
 
   try
     {type, data} = JSON.parse(message)
-    logger.info 'nsync:onmessage:recieved', {type}
+    console.log 'nsync:received', {type}
   catch error
-    return logger.error 'nsync:onmessage:parse', {error}
+    return console.error 'nsync:received:parse', {error}
 
   strategy = messageStrategies[type]
 
   if not strategy?
-    logger.error 'nsync:onmessage:strategy', {error: "No strategy for #{type}"}
+    console.error 'nsync:strategy', "No strategy for #{type}"
   else
     strategy(nsync, data)
 
