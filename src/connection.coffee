@@ -16,19 +16,21 @@ class Connection
     @socket = new AtomSocket('fs', @url)
 
     @socket.on 'open', (event) =>
-      @onOpen(event)
+      @onOpen()
 
     @socket.on 'message', (event) =>
       onmessage(event, @nsync)
 
     @socket.on 'error', (err) =>
-      @onClose(err)
+      logger.error 'nsync:connection:error', err
+      @onCloseOrError()
 
     @socket.on 'close', (event) =>
-      @onClose(event)
+      logger.error 'nsync:connection:closed', event
+      @onCloseOrError()
 
     @socket.on 'open:cached', (event) =>
-      @onCachedOpen(event)
+      @onCachedOpen()
 
   onCachedOpen: ->
     @onOpen()
@@ -43,9 +45,7 @@ class Connection
 
     @nsync.activate()
 
-  onClose: (event) ->
-    logger.warn 'WS CLOSED:', event
-
+  onCloseOrError: ->
     if @connected and not @reconnecting
       @nsync.disconnected()
 
@@ -73,7 +73,7 @@ class Connection
 
     secondsBetweenAttempts = 5
     setTimeout =>
-      @connect(@url, @opts)
+      @socket.reset()
     , secondsBetweenAttempts * 1000
 
   successfulReconnect: ->
@@ -110,7 +110,7 @@ class Connection
       return @ping()
 
     if isRepeat
-      @socket.close()
+      @socket.reset()
     else
       @waitForPong(timestamp)
 
