@@ -25,13 +25,14 @@ module.exports = onmessage = (message, nsync) ->
 
   try
     {type, data} = JSON.parse(message)
-    logger.info 'RECEIVED:', type
-  catch err
-    return logger.error 'ERROR PARSING MESSAGE:', err
+    logger.info 'nsync:onmessage:recieved', {type}
+  catch error
+    return logger.error 'nsync:onmessage:parse', {error}
 
   strategy = messageStrategies[type]
 
   if not strategy?
-    logger.error "Unhandled message type: #{type}"
+    logger.error 'nsync:onmessage:strategy', {error: "No strategy for #{type}"}
   else
     strategy(nsync, data)
+

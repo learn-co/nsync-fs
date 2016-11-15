@@ -57,12 +57,12 @@ class Connection
       msg = 'The operation cannot be performed while disconnected'
       @nsync.disconnected(msg)
 
-    logger.info 'SEND:', msg
+    logger.info 'nsync:connection:send', msg
     payload = JSON.stringify(msg)
     @socket.send(payload)
 
   sendPing: (msg) ->
-    logger.info 'SEND:', 'ping'
+    logger.info 'nsync:connection:send:ping'
     payload = JSON.stringify(msg)
     @socket.send(payload)
 
