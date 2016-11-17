@@ -52,6 +52,12 @@ class Nsync
       if err?
         console.warn 'Unable to flush cache:', err
 
+  safeResetConnection: ->
+    @connection.conditionallyReset()
+
+  resetConnection: ->
+    @connection.reset()
+
   disconnected: (msg) ->
     @emitter.emit('did-disconnect', msg)
 

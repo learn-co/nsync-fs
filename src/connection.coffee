@@ -9,7 +9,6 @@ AtomSocket = require('atom-socket')
 module.exports =
 class Connection
   constructor: (@nsync) ->
-    @pings = []
 
   connect: (@url, @opts) ->
     @socket = new AtomSocket('fs', @url)
@@ -37,7 +36,6 @@ class Connection
 
   onOpen: ->
     @connected = true
-    @startPingsAfterInit()
 
     if @reconnecting
       @successfulReconnect()
@@ -60,62 +58,24 @@ class Connection
     payload = JSON.stringify(msg)
     @socket.send(payload)
 
-  sendPing: (msg) ->
-    console.log 'nsync:send:ping'
-    payload = JSON.stringify(msg)
-    @socket.send(payload)
-
   reconnect: ->
-    unless @reconnecting
+    if not @reconnecting
       @reconnecting = true
       @nsync.connecting()
 
     secondsBetweenAttempts = 5
     setTimeout =>
-      @socket.reset()
+      @conditionallyReset()
     , secondsBetweenAttempts * 1000
 
   successfulReconnect: ->
     @reconnecting = false
     @nsync.connected()
 
-  startPingsAfterInit: ->
-    # TODO: something cleaner, this simply waits n minutes after init is sent
-    minutes = 3
-    setTimeout =>
-      @ping()
-    , minutes * 60 * 1000
+  conditionallyReset: ->
+    if not @connected
+      @reset()
 
-  ping: ->
-    return if not @connected
-
-    timestamp = (new Date).toString()
-    @pings.push(timestamp)
-
-    @sendPing {command: 'ping', timestamp}
-    @waitForPong(timestamp)
-
-  waitForPong: (timestamp) ->
-    secondsToWait = 4
-    isRepeat = timestamp is @currentPing
-    @currentPing = timestamp
-
-    setTimeout =>
-      @resolvePing(timestamp, isRepeat)
-    , secondsToWait * 1000
-
-  resolvePing: (timestamp, isRepeat) ->
-    if not @pings.includes(timestamp)
-      return @ping()
-
-    if isRepeat
-      @socket.reset()
-    else
-      @waitForPong(timestamp)
-
-  pong: (timestamp) ->
-    i = @pings.indexOf(timestamp)
-
-    if i > -1
-      @pings.splice(i, 1)
+  reset: ->
+    @socket.reset()
 
