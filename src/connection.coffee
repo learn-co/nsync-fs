@@ -13,21 +13,19 @@ class Connection
   connect: (@url, @opts) ->
     @socket = new AtomSocket('fs', @url)
 
-    @socket.on 'open', (event) =>
+    @socket.on 'open', =>
       @onOpen()
 
-    @socket.on 'message', (event) =>
+    @socket.on 'message', =>
       onmessage(event, @nsync)
 
-    @socket.on 'error', (err) =>
-      console.error 'nsync:error', err
+    @socket.on 'error', =>
       @onCloseOrError()
 
-    @socket.on 'close', (event) =>
-      console.error 'nsync:closed', event
+    @socket.on 'close', =>
       @onCloseOrError()
 
-    @socket.on 'open:cached', (event) =>
+    @socket.on 'open:cached', =>
       @onCachedOpen()
 
   onCachedOpen: ->
@@ -38,16 +36,17 @@ class Connection
     @connected = true
 
     if @reconnecting
-      @successfulReconnect()
+      @reconnecting = false
+      @nsync.connected()
 
     @nsync.activate()
 
   onCloseOrError: ->
     if @connected and not @reconnecting
+      @reconnecting = true
       @nsync.disconnected()
 
     @connected = false
-    @reconnect()
 
   send: (msg) ->
     if not @connected
@@ -57,20 +56,6 @@ class Connection
     console.log 'nsync:send', msg
     payload = JSON.stringify(msg)
     @socket.send(payload)
-
-  reconnect: ->
-    if not @reconnecting
-      @reconnecting = true
-      @nsync.connecting()
-
-    secondsBetweenAttempts = 5
-    setTimeout =>
-      @conditionallyReset()
-    , secondsBetweenAttempts * 1000
-
-  successfulReconnect: ->
-    @reconnecting = false
-    @nsync.connected()
 
   conditionallyReset: ->
     if not @connected
