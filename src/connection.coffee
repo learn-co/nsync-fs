@@ -16,8 +16,8 @@ class Connection
     @socket.on 'open', =>
       @onOpen()
 
-    @socket.on 'message', =>
-      onmessage(event, @nsync)
+    @socket.on 'message', (msg) =>
+      onmessage(msg, @nsync)
 
     @socket.on 'error', =>
       @onCloseOrError()
