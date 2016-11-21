@@ -13,21 +13,19 @@ class Connection
   connect: (@url, @opts) ->
     @socket = new AtomSocket('fs', @url)
 
-    @socket.on 'open', (event) =>
+    @socket.on 'open', =>
       @onOpen()
 
-    @socket.on 'message', (event) =>
-      onmessage(event, @nsync)
+    @socket.on 'message', (msg) =>
+      onmessage(msg, @nsync)
 
-    @socket.on 'error', (err) =>
-      console.error 'nsync:error', err
+    @socket.on 'error', =>
       @onCloseOrError()
 
-    @socket.on 'close', (event) =>
-      console.error 'nsync:closed', event
+    @socket.on 'close', =>
       @onCloseOrError()
 
-    @socket.on 'open:cached', (event) =>
+    @socket.on 'open:cached', =>
       @onCachedOpen()
 
   onCachedOpen: ->
