@@ -1,9 +1,4 @@
-_path = require 'path'
 onmessage= require './onmessage'
-remote = require 'remote'
-BrowserWindow = remote.require('browser-window')
-pagebus = require('page-bus')
-bus = pagebus()
 AtomSocket = require('atom-socket')
 
 module.exports =
@@ -56,11 +51,4 @@ class Connection
     console.log 'nsync:send', msg
     payload = JSON.stringify(msg)
     @socket.send(payload)
-
-  conditionallyReset: ->
-    if not @connected
-      @reset()
-
-  reset: ->
-    @socket.reset()
 

@@ -4,7 +4,6 @@ error = require './onmessage-strategies/error'
 fetch = require './onmessage-strategies/fetch'
 init = require './onmessage-strategies/init'
 open = require './onmessage-strategies/open'
-pong = require './onmessage-strategies/pong'
 ready = require './onmessage-strategies/ready'
 sync = require './onmessage-strategies/sync'
 
@@ -15,7 +14,6 @@ messageStrategies = {
   fetch,
   init,
   open,
-  pong,
   ready,
   sync
 }

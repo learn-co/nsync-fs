@@ -1,9 +1,6 @@
-_ = require 'underscore-plus'
 _path = require 'path'
 convert = require './convert'
 fs = require 'fs-plus'
-os = require 'os'
-shell = require 'shell'
 {Emitter} = require 'event-kit'
 Connection = require './connection'
 FSAdapter = require './adapters/fs-adapter'
@@ -52,17 +49,8 @@ class Nsync
       if err?
         console.warn 'Unable to flush cache:', err
 
-  safeResetConnection: ->
-    @connection.conditionallyReset()
-
-  resetConnection: ->
-    @connection.reset()
-
   disconnected: (msg) ->
     @emitter.emit('did-disconnect', msg)
-
-  connecting: ->
-    @emitter.emit('will-connect')
 
   connected: ->
     @emitter.emit('did-connect')
@@ -216,9 +204,6 @@ class Nsync
 
   onDidDisconnect: (callback) ->
     @emitter.on 'did-disconnect', callback
-
-  onWillConnect: (callback) ->
-    @emitter.on 'will-connect', callback
 
   onDidConnect: (callback) ->
     @emitter.on 'did-connect', callback
