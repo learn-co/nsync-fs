@@ -27,13 +27,13 @@ class Connection
     @onOpen()
     @nsync.init()
 
-  onOpen: ->
-    @connected = true
-
+  onReady: ->
     if @reconnecting
       @reconnecting = false
       @nsync.connected()
 
+  onOpen: ->
+    @connected = true
     @nsync.activate()
 
   onCloseOrError: ->
