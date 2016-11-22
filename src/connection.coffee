@@ -1,9 +1,4 @@
-_path = require 'path'
 onmessage= require './onmessage'
-remote = require 'remote'
-BrowserWindow = remote.require('browser-window')
-pagebus = require('page-bus')
-bus = pagebus()
 AtomSocket = require('atom-socket')
 
 module.exports =
@@ -32,20 +27,21 @@ class Connection
     @onOpen()
     @nsync.init()
 
+  onReady: ->
+    if @reconnecting
+      @reconnecting = false
+      @nsync.connected()
+
   onOpen: ->
     @connected = true
-
-    if @reconnecting
-      @successfulReconnect()
-
     @nsync.activate()
 
   onCloseOrError: ->
     if @connected and not @reconnecting
+      @reconnecting = true
       @nsync.disconnected()
 
     @connected = false
-    @reconnect()
 
   send: (msg) ->
     if not @connected
@@ -55,25 +51,4 @@ class Connection
     console.log 'nsync:send', msg
     payload = JSON.stringify(msg)
     @socket.send(payload)
-
-  reconnect: ->
-    if not @reconnecting
-      @reconnecting = true
-      @nsync.connecting()
-
-    secondsBetweenAttempts = 5
-    setTimeout =>
-      @conditionallyReset()
-    , secondsBetweenAttempts * 1000
-
-  successfulReconnect: ->
-    @reconnecting = false
-    @nsync.connected()
-
-  conditionallyReset: ->
-    if not @connected
-      @reset()
-
-  reset: ->
-    @socket.reset()
 
