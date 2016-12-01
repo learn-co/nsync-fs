@@ -1,6 +1,6 @@
 _ = require 'underscore-plus'
 fs = require 'fs-plus'
-trash = require 'trash'
+trash = require '../trash'
 
 module.exports = sync = (nsync, {path, pathAttributes}) ->
   console.log 'SYNC:', path
