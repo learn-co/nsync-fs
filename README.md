@@ -24,6 +24,7 @@ nsync.onDidSetPrimary(function(data) {
 })
 ```
 
+#### Custom Commands
 Custom commands can be passed from the server to the client, to be handled like this:
 ```javascript
 nsync.onDidReceiveCustomCommand(function(commandPayload) {
