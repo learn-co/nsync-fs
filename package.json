@@ -1,6 +1,6 @@
 {
   "name": "nsync-fs",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "main": "./lib/nsync-fs",
   "description": "A virtual file system for Atom, synchronized with a remote physical file system",
   "repository": "https://github.com/learn-co/nsync-fs",
@@ -9,7 +9,7 @@
     "prepublish": "gulp coffee"
   },
   "dependencies": {
-    "atom-socket": "0.0.5",
+    "atom-socket": "0.0.7",
     "dotenv": "2.0.0",
     "event-kit": "1.0.0",
     "fs-plus": "^2.9.3",
