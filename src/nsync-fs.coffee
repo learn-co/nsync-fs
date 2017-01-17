@@ -49,11 +49,19 @@ class Nsync
       if err?
         console.warn 'Unable to flush cache:', err
 
-  disconnected: (msg) ->
-    @emitter.emit('did-disconnect', msg)
+  disconnected: ->
+    @isConnected = false
+    @emitter.emit('did-disconnect')
+
+  disconnectedSend: (msg) ->
+    @emitter.emit('did-send-while-disconnected', msg)
 
   connected: ->
+    @isConnected = true
     @emitter.emit('did-connect')
+
+  resetConnection: ->
+    @connection.reset()
 
   loading: ->
     @emitter.emit('will-load')
@@ -83,7 +91,7 @@ class Nsync
   syncPrimaryNode: ->
     @sync(@primaryNode.path)
 
-  activate: ->
+  readPrimaryNodeFromCache: ->
     fs.readFile @cachedPrimaryNode, (err, data) =>
       if err?
         console.warn 'Unable to load cached primary node:', err
@@ -108,7 +116,10 @@ class Nsync
       else
         convertedMsg[key] = value
 
-    @connection.send(convertedMsg)
+    if @isConnected is false
+      @disconnectedSend(convertedMsg)
+
+    @connection.send(JSON.stringify(convertedMsg))
 
   # ------------------
   # File introspection
@@ -204,6 +215,9 @@ class Nsync
 
   onDidDisconnect: (callback) ->
     @emitter.on 'did-disconnect', callback
+
+  onDidSendWhileDisconnected: (callback) ->
+    @emitter.on 'did-send-while-disconnected', callback
 
   onDidConnect: (callback) ->
     @emitter.on 'did-connect', callback
