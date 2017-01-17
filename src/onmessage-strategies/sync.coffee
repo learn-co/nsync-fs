@@ -14,7 +14,7 @@ module.exports = sync = (nsync, {path, pathAttributes}) ->
     existingRemotePaths = node.map (e) -> e.localPath()
     existingLocalPaths = fs.listTreeSync(localPath)
     localPathsToRemove = _.difference(existingLocalPaths, existingRemotePaths)
-    trash(localPathsToRemove)
+    trash(localPathsToRemove, nsync)
 
   node.findPathsToSync().then (paths) ->
     nsync.fetch(paths)
