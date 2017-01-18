@@ -9,7 +9,7 @@
     "prepublish": "gulp coffee"
   },
   "dependencies": {
-    "atom-socket": "0.0.7",
+    "atom-socket": "0.0.8",
     "dotenv": "2.0.0",
     "event-kit": "1.0.0",
     "fs-plus": "^2.9.3",
