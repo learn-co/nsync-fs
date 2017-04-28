@@ -27,6 +27,7 @@ module.exports = onmessage = (message, nsync) ->
     return console.error 'nsync:received:parse', {error}
 
   strategy = messageStrategies[type]
+  data ?= {}
 
   if not strategy?
     console.error 'nsync:strategy', "No strategy for #{type}"
