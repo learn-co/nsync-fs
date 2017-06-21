@@ -119,7 +119,7 @@ class Nsync
     if @isConnected is false
       @disconnectedSend(convertedMsg)
 
-    @connection.send(JSON.stringify(convertedMsg))
+    @connection.send(convertedMsg)
 
   # ------------------
   # File introspection
