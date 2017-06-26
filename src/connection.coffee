@@ -5,8 +5,8 @@ module.exports =
 class Connection
   constructor: (@nsync) ->
 
-  connect: (@url, @opts) ->
-    @socket = new AtomSocket('fs', @url)
+  connect: (@url, @socketKey) ->
+    @socket = new AtomSocket(@socketKey, @url)
 
     @socket.on 'open', =>
       @nsync.connected()
@@ -25,7 +25,8 @@ class Connection
       @nsync.init()
 
   send: (msg) ->
-    @socket.send(msg)
+    preparedMessage = JSON.stringify(file_sync: msg)
+    @socket.send(preparedMessage)
 
   reset: ->
     @socket.reset()

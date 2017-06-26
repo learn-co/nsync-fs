@@ -18,8 +18,8 @@ class Nsync
   configure: ({@expansionState, @localRoot, connection}) ->
     @setLocalPaths()
 
-    {websocket, url, opts} = connection
-    @connection.connect(url, opts, websocket)
+    {url, socketKey} = connection
+    @connection.connect(url, socketKey)
 
     @emitter.emit('did-configure')
 
@@ -119,7 +119,7 @@ class Nsync
     if @isConnected is false
       @disconnectedSend(convertedMsg)
 
-    @connection.send(JSON.stringify(convertedMsg))
+    @connection.send(convertedMsg)
 
   # ------------------
   # File introspection

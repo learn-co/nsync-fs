@@ -19,13 +19,16 @@ messageStrategies = {
 }
 
 module.exports = onmessage = (message, nsync) ->
-
   try
-    {type, data} = JSON.parse(message)
-    console.log 'nsync:received', {type}
+    {file_sync} = JSON.parse(message)
   catch error
     return console.error 'nsync:received:parse', {error}
 
+  if not file_sync?
+    return
+
+  {type, data} = file_sync
+  console.log 'nsync:received', {type}
   strategy = messageStrategies[type]
 
   if not strategy?
