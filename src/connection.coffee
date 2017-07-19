@@ -1,33 +1,26 @@
 onmessage= require './onmessage'
-AtomSocket = require 'atom-socket'
 
 module.exports =
 class Connection
   constructor: (@nsync) ->
 
-  connect: (@url, @socketKey) ->
-    @socket = new AtomSocket(@socketKey, @url)
+  subscribeTo: (@channel) ->
+    @nsync.connected()
+    @nsync.readPrimaryNodeFromCache()
 
-    @socket.on 'open', =>
-      @nsync.connected()
-      @nsync.readPrimaryNodeFromCache()
+    @channel.on 'file_system_event', ({file_system_event}) =>
+      decoded = new Buffer(file_system_event, 'base64').toString()
+      onmessage(decoded, @nsync)
 
-    @socket.on 'message', (msg) =>
-      onmessage(msg, @nsync)
-
-    @socket.on 'error', =>
+    @channel.onError =>
       @nsync.disconnected()
 
-    @socket.on 'close', =>
+    @channel.onClose =>
       @nsync.disconnected()
-
-    @socket.on 'open:cached', =>
-      @nsync.init()
 
   send: (msg) ->
-    preparedMessage = JSON.stringify(file_sync: msg)
-    @socket.send(preparedMessage)
+    @channel.push('file_system_event', data: msg)
 
   reset: ->
-    @socket.reset()
+    @channel.reset()
 
