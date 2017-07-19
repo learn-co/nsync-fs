@@ -22,5 +22,4 @@ class Connection
     @channel.push('file_system_event', data: msg)
 
   reset: ->
-    @channel.reset()
-
+    delete @channel
