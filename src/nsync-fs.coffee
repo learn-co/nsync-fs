@@ -15,11 +15,10 @@ class Nsync
     @primaryNode = new FilesystemNode({})
     @connection = new Connection(this)
 
-  configure: ({@expansionState, @localRoot, connection}) ->
+  configure: ({@expansionState, @localRoot, channel}) ->
     @setLocalPaths()
 
-    {url, socketKey} = connection
-    @connection.connect(url, socketKey)
+    @connection.subscribeTo(channel)
 
     @emitter.emit('did-configure')
 
