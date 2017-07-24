@@ -59,9 +59,6 @@ class Nsync
     @isConnected = true
     @emitter.emit('did-connect')
 
-  resetConnection: ->
-    @connection.reset()
-
   loading: ->
     @emitter.emit('will-load')
 
