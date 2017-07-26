@@ -20,7 +20,3 @@ class Connection
 
   send: (msg) ->
     @channel.push('file_system_event', data: msg)
-
-  reset: ->
-    @channel.reset()
-
