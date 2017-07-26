@@ -145,9 +145,3 @@ class FilesystemNode
           localDigest = hash.digest('hex')
           return resolve(@digest isnt localDigest)
 
-  serialize: ->
-    tree = @tree.map (node) -> node.serialize()
-    stat = @stats.serialize()
-
-    {@name, @path, @digest, tree, stat}
-

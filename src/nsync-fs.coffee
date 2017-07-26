@@ -29,24 +29,7 @@ class Nsync
     @receivedLog = _path.join(@logDirectory, 'received')
     @sentLog = _path.join(@logDirectory, 'sent')
 
-    @cacheDirectory = _path.join(@localRoot, 'var', 'cache')
-    @cachedPrimaryNode = _path.join(@cacheDirectory, 'primary-node')
-
     fs.makeTreeSync(@logDirectory)
-    fs.makeTreeSync(@cacheDirectory)
-
-  serialize: ->
-    @primaryNode.serialize()
-
-  cache: ->
-    if @hasPrimaryNode()
-      data = JSON.stringify(@serialize())
-      fs.writeFile(@cachedPrimaryNode, data)
-
-  flushCache: ->
-    fs.remove @cachedPrimaryNode, (err) ->
-      if err?
-        console.warn 'Unable to flush cache:', err
 
   disconnected: ->
     @isConnected = false
@@ -74,10 +57,6 @@ class Nsync
   updated: (node) ->
     @emitter.emit('did-update', node.localPath())
 
-  setPrimaryNodeFromCache: (serializedNode) ->
-    return if @hasPrimaryNode()
-    @setPrimaryNode(serializedNode)
-
   setPrimaryNode: (serializedNode) ->
     @primaryNode = new FilesystemNode(serializedNode)
 
@@ -86,22 +65,6 @@ class Nsync
 
   syncPrimaryNode: ->
     @sync(@primaryNode.path)
-
-  readPrimaryNodeFromCache: ->
-    fs.readFile @cachedPrimaryNode, (err, data) =>
-      if err?
-        console.warn 'Unable to load cached primary node:', err
-        @loading()
-        return
-
-      try
-        serializedNode = JSON.parse(data)
-      catch error
-        console.warn 'Unable to parse cached primary node:', error
-        @loading()
-        return
-
-      @setPrimaryNodeFromCache(serializedNode)
 
   send: (msg) ->
     convertedMsg = {}
