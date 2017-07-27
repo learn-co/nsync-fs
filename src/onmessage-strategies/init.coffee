@@ -5,6 +5,7 @@ module.exports = init = (nsync, {virtualFile}) ->
     nsync.setPrimaryNode(virtualFile)
     nsync.syncPrimaryNode()
   else
+    console.warn("recieved empty virtualFile in init, retrying...")
     wait *= 2
     setTimeout ->
       nsync.init()
